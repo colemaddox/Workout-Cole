@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Training Log</title>
+<meta name="theme-color" content="#15120D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Training Log">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#15120D;
+    --ink-2:#1D190F;
+    --surface:#211C12;
+    --surface-2:#272013;
+    --line:#3A3120;
+    --line-soft:#2C2517;
+    --paper:#ECE2CC;
+    --paper-dim:#C9BD9F;
+    --muted:#8E8467;
+    --brass:#C9A24B;
+    --brass-bright:#E0B85A;
+    --brass-deep:#9A7B33;
+    --sage:#8AA06A;
+    --red:#C66A4F;
+    --serif:"Fraunces", Georgia, "Times New Roman", serif;
+    --sans:"Hanken Grotesk", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --mono:"Spline Sans Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    background-image:
+      radial-gradient(120% 80% at 50% -10%, rgba(201,162,75,0.10), rgba(0,0,0,0) 55%),
+      radial-gradient(100% 60% at 50% 120%, rgba(0,0,0,0.55), rgba(0,0,0,0) 60%);
+    color:var(--paper);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.55;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .grain{
+    position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .wrap{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:0 18px 140px;}
+
+  /* Masthead */
+  header.mast{padding:30px 0 16px;text-align:center;}
+  .mast .vol{font-family:var(--mono);font-size:11px;letter-spacing:0.32em;color:var(--brass);text-transform:uppercase;}
+  .mast h1{font-family:var(--serif);font-weight:600;font-size:40px;line-height:1;margin:8px 0 6px;letter-spacing:-0.01em;color:var(--paper);}
+  .mast .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:0.26em;color:var(--muted);text-transform:uppercase;}
+  .rule{height:1px;background:linear-gradient(90deg, rgba(201,162,75,0) 0%, rgba(201,162,75,0.55) 50%, rgba(201,162,75,0) 100%);margin:16px 0;}
+
+  /* Nav */
+  nav.tabs{display:flex;gap:6px;background:var(--ink-2);border:1px solid var(--line-soft);border-radius:12px;padding:5px;margin:0 0 22px;}
+  nav.tabs button{flex:1;appearance:none;border:none;background:transparent;color:var(--paper-dim);font-family:var(--sans);font-weight:600;font-size:14px;letter-spacing:0.02em;padding:11px 10px;border-radius:8px;cursor:pointer;transition:all .18s ease;}
+  nav.tabs button.active{background:var(--surface-2);color:var(--brass-bright);box-shadow:inset 0 0 0 1px var(--line);}
+
+  .view{display:none;animation:fade .3s ease;}
+  .view.show{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+  /* Field label */
+  .flabel{font-family:var(--mono);font-size:10.5px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;gap:8px;}
+  .flabel::before{content:"";width:14px;height:1px;background:var(--brass-deep);}
+
+  /* Date + meta row */
+  .meta{display:flex;gap:12px;margin:0 0 20px;}
+  .meta .field{flex:1;}
+  input[type="date"], select, input[type="number"], input[type="text"], textarea{
+    width:100%;background:var(--ink-2);border:1px solid var(--line-soft);border-radius:10px;
+    color:var(--paper);font-family:var(--sans);font-size:15px;padding:12px 13px;outline:none;transition:border-color .15s, box-shadow .15s;
+  }
+  input[type="number"]{font-family:var(--mono);font-size:17px;text-align:center;letter-spacing:0.01em;}
+  input:focus, select:focus, textarea:focus{border-color:var(--brass-deep);box-shadow:0 0 0 3px rgba(201,162,75,0.12);}
+  input::placeholder, textarea::placeholder{color:#615a44;}
+  select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C9A24B' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px;}
+
+  /* Session type selector */
+  .types{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 0 24px;}
+  .types button{appearance:none;cursor:pointer;text-align:left;background:var(--ink-2);border:1px solid var(--line-soft);border-radius:12px;padding:13px 12px;color:var(--paper-dim);transition:all .18s ease;}
+  .types button .t-tag{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--paper);display:block;line-height:1;}
+  .types button .t-sub{font-size:10.5px;color:var(--muted);display:block;margin-top:6px;line-height:1.25;letter-spacing:0.01em;}
+  .types button.active{border-color:var(--brass);background:var(--surface-2);box-shadow:0 0 0 1px var(--brass) inset;}
+  .types button.active .t-tag{color:var(--brass-bright);}
+  .types button.active .t-sub{color:var(--paper-dim);}
+
+  /* Exercise card */
+  .ex-card{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:15px 15px 13px;margin:0 0 12px;}
+  .ex-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;}
+  .ex-head .ex-name{flex:1;background:transparent;border:none;border-bottom:1px solid transparent;border-radius:0;padding:2px 0;font-family:var(--serif);font-weight:600;font-size:19px;color:var(--paper);}
+  .ex-head .ex-name:focus{box-shadow:none;border-bottom:1px solid var(--brass-deep);}
+  .ex-last{font-family:var(--mono);font-size:11px;color:var(--brass-deep);margin:-6px 0 12px;letter-spacing:0.01em;}
+  .ex-last b{color:var(--brass);font-weight:500;}
+  .x-btn{appearance:none;border:none;background:transparent;color:var(--muted);font-size:20px;line-height:1;cursor:pointer;padding:2px 4px;border-radius:6px;transition:color .15s;}
+  .x-btn:hover{color:var(--red);}
+
+  .set-row{display:grid;grid-template-columns:30px 1fr 1fr 30px;align-items:center;gap:9px;margin-bottom:8px;}
+  .set-row .snum{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:center;}
+  .set-row .unit-wrap{position:relative;}
+  .set-row .unit-wrap .unit{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:10px;color:var(--muted);pointer-events:none;letter-spacing:0.05em;}
+  .set-row input{padding-right:30px;}
+  .set-head{display:grid;grid-template-columns:30px 1fr 1fr 30px;gap:9px;margin-bottom:7px;}
+  .set-head span{font-family:var(--mono);font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);text-align:center;}
+  .add-set{appearance:none;width:100%;background:transparent;border:1px dashed var(--line);border-radius:9px;color:var(--paper-dim);font-family:var(--sans);font-weight:600;font-size:12.5px;letter-spacing:0.03em;padding:9px;cursor:pointer;margin-top:4px;transition:all .15s;}
+  .add-set:hover{border-color:var(--brass-deep);color:var(--brass);}
+
+  /* Add exercise */
+  .add-ex{appearance:none;width:100%;background:var(--ink-2);border:1px solid var(--line-soft);border-radius:12px;color:var(--paper-dim);font-family:var(--sans);font-weight:600;font-size:13px;letter-spacing:0.02em;padding:13px;cursor:pointer;margin:2px 0 26px;transition:all .15s;}
+  .add-ex:hover{border-color:var(--brass-deep);color:var(--brass);}
+
+  /* Cardio */
+  .cardio-card{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:14px 15px;margin:0 0 12px;}
+  .cardio-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .cardio-grid .full{grid-column:1 / -1;}
+  .cc-field label{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin:0 0 5px 2px;}
+  .cardio-card .ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;}
+  .cardio-card .ch span{font-family:var(--serif);font-weight:600;font-size:17px;color:var(--paper);}
+
+  /* Core checkboxes */
+  .core-grid{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 24px;}
+  .chip{appearance:none;cursor:pointer;background:var(--ink-2);border:1px solid var(--line-soft);border-radius:999px;color:var(--paper-dim);font-family:var(--sans);font-weight:500;font-size:13px;padding:9px 15px;transition:all .15s;}
+  .chip.on{background:rgba(138,160,106,0.14);border-color:var(--sage);color:#bcd09c;}
+  .chip.on::before{content:"\2713  ";font-weight:700;}
+
+  /* Effort */
+  .effort-row{display:flex;align-items:center;gap:12px;margin:0 0 18px;}
+  .effort-row .flabel{margin:0;flex-shrink:0;}
+
+  textarea{resize:vertical;min-height:64px;font-size:14.5px;line-height:1.5;}
+
+  /* Save bar */
+  .savebar{position:fixed;bottom:0;left:0;right:0;z-index:5;padding:14px 18px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(180deg, rgba(21,18,13,0) 0%, rgba(21,18,13,0.92) 28%, var(--ink) 70%);backdrop-filter:blur(4px);}
+  .savebar .inner{max-width:520px;margin:0 auto;}
+  .save-btn{appearance:none;width:100%;background:var(--brass);border:none;border-radius:13px;color:#241a07;font-family:var(--sans);font-weight:700;font-size:16px;letter-spacing:0.02em;padding:16px;cursor:pointer;transition:transform .12s, background .15s;box-shadow:0 6px 24px rgba(201,162,75,0.18);}
+  .save-btn:active{transform:scale(0.985);}
+  .save-btn:disabled{background:var(--line);color:var(--muted);box-shadow:none;cursor:default;}
+
+  .hint{font-size:12.5px;color:var(--muted);text-align:center;margin:14px 0 0;font-family:var(--mono);letter-spacing:0.02em;}
+
+  /* History */
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 22px;}
+  .stat{background:var(--surface);border:1px solid var(--line-soft);border-radius:13px;padding:16px 16px;}
+  .stat .num{font-family:var(--serif);font-weight:600;font-size:32px;line-height:1;color:var(--brass-bright);}
+  .stat .num small{font-size:16px;color:var(--muted);font-family:var(--mono);font-weight:400;}
+  .stat .lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-top:9px;}
+
+  .h-item{background:var(--surface);border:1px solid var(--line-soft);border-radius:13px;margin:0 0 10px;overflow:hidden;}
+  .h-top{display:flex;align-items:center;gap:12px;padding:15px 16px;cursor:pointer;}
+  .h-badge{font-family:var(--mono);font-weight:600;font-size:13px;width:38px;height:38px;flex-shrink:0;border-radius:9px;display:flex;align-items:center;justify-content:center;background:var(--ink-2);border:1px solid var(--line);color:var(--brass);}
+  .h-badge.b-A{color:var(--brass-bright);border-color:var(--brass-deep);}
+  .h-badge.b-B{color:var(--sage);border-color:#4d5a39;}
+  .h-meta{flex:1;min-width:0;}
+  .h-date{font-family:var(--sans);font-weight:600;font-size:15px;color:var(--paper);}
+  .h-sum{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:2px;letter-spacing:0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .h-chev{color:var(--muted);font-size:13px;transition:transform .2s;}
+  .h-item.open .h-chev{transform:rotate(180deg);}
+  .h-body{display:none;padding:0 16px 16px;border-top:1px solid var(--line-soft);}
+  .h-item.open .h-body{display:block;}
+  .h-line{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line-soft);}
+  .h-line:last-child{border-bottom:none;}
+  .h-line .hl-name{font-family:var(--serif);font-weight:500;font-size:15px;color:var(--paper);}
+  .h-line .hl-val{font-family:var(--mono);font-size:13px;color:var(--brass);text-align:right;letter-spacing:0.01em;}
+  .h-section-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin:15px 0 4px;}
+  .h-notes{font-size:14px;color:var(--paper-dim);font-style:italic;line-height:1.5;margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft);font-family:var(--serif);}
+  .del{appearance:none;background:transparent;border:1px solid var(--line);border-radius:8px;color:var(--muted);font-family:var(--sans);font-weight:600;font-size:12px;padding:8px 14px;cursor:pointer;margin-top:14px;transition:all .15s;}
+  .del:hover{color:var(--red);border-color:var(--red);}
+  .del.armed{color:#fff;background:var(--red);border-color:var(--red);}
+
+  .empty{text-align:center;padding:50px 20px;}
+  .empty .e-mark{font-family:var(--serif);font-size:46px;color:var(--line);line-height:1;}
+  .empty p{color:var(--muted);font-family:var(--mono);font-size:12.5px;letter-spacing:0.04em;margin-top:14px;}
+
+  .reset{appearance:none;display:block;margin:30px auto 0;background:transparent;border:none;color:var(--line);font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;padding:8px;transition:color .15s;}
+  .reset:hover{color:var(--muted);}
+  .reset.armed{color:var(--red);}
+
+  .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);z-index:20;background:var(--surface-2);border:1px solid var(--brass-deep);color:var(--brass-bright);font-family:var(--mono);font-size:12.5px;letter-spacing:0.04em;padding:12px 20px;border-radius:10px;opacity:0;pointer-events:none;transition:all .35s ease;box-shadow:0 8px 30px rgba(0,0,0,0.5);}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .loading{text-align:center;padding:60px 0;color:var(--muted);font-family:var(--mono);font-size:12px;letter-spacing:0.1em;}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="wrap">
+  <header class="mast">
+    <div class="vol">Vol. I</div>
+    <h1>Training Log</h1>
+    <div class="tag">Cycle 01 &middot; Four-Week Foundation</div>
+  </header>
+  <div class="rule"></div>
+
+  <nav class="tabs">
+    <button id="tab-log" class="active">Log a Session</button>
+    <button id="tab-hist">History</button>
+  </nav>
+
+  <div id="loading" class="loading">Opening the ledger&hellip;</div>
+
+  <!-- LOG VIEW -->
+  <section id="view-log" class="view">
+    <div class="meta">
+      <div class="field">
+        <div class="flabel">Date</div>
+        <input type="date" id="in-date">
+      </div>
+    </div>
+
+    <div class="flabel">Today's Session</div>
+    <div class="types">
+      <button data-type="A"><span class="t-tag">A</span><span class="t-sub">Strength + Cardio</span></button>
+      <button data-type="B"><span class="t-tag">B</span><span class="t-sub">Cardio + Core</span></button>
+      <button data-type="Free"><span class="t-tag">Free</span><span class="t-sub">Your own call</span></button>
+    </div>
+
+    <div id="form-area"></div>
+  </section>
+
+  <!-- HISTORY VIEW -->
+  <section id="view-hist" class="view">
+    <div id="stats" class="stats"></div>
+    <div class="flabel">The Record</div>
+    <div id="hist-list"></div>
+    <button id="reset-btn" class="reset">Erase all records</button>
+  </section>
+</div>
+
+<div class="savebar" id="savebar" style="display:none;">
+  <div class="inner">
+    <button class="save-btn" id="save-btn">Save Session</button>
+    <p class="hint">Saved automatically. Your numbers wait for you here.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var KEY = "cole-training-log";
+  var memFallback = [];
+
+  var PROGRAM = {
+    A: {
+      strength: [
+        { name:"Leg Press",   sets:3, reps:"10-12" },
+        { name:"Chest Press", sets:3, reps:"10-12" },
+        { name:"Seated Row",  sets:3, reps:"10-12" },
+        { name:"Lat Pulldown",sets:3, reps:"10-12" },
+        { name:"Leg Curl",    sets:2, reps:"10-12" },
+        { name:"Calf Raise",  sets:2, reps:"12-15" }
+      ],
+      cardio:1,
+      core:["Plank","Dead Bug"]
+    },
+    B: {
+      strength:[],
+      cardio:1,
+      core:["Glute Bridges","Bird-Dogs","Dead Bugs","Plank"]
+    },
+    Free: { strength:[], cardio:1, core:[] }
+  };
+
+  var Store = {
+    load: function(){
+      try {
+        var raw = localStorage.getItem(KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch(e){ return memFallback.slice(); }
+    },
+    save: function(log){
+      try {
+        localStorage.setItem(KEY, JSON.stringify(log));
+        memFallback = log.slice();
+        return true;
+      } catch(e){ memFallback = log.slice(); return false; }
+    }
+  };
+
+  var LOG = [];
+  var currentType = null;
+
+  var $ = function(id){ return document.getElementById(id); };
+
+  function fmtDate(iso){
+    var p = iso.split("-");
+    var d = new Date(+p[0], +p[1]-1, +p[2]);
+    var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    var mon = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return days[d.getDay()] + ", " + mon[d.getMonth()] + " " + d.getDate();
+  }
+
+  function startOfWeek(d){
+    var x = new Date(d);
+    var day = (x.getDay() + 6) % 7;
+    x.setHours(0,0,0,0);
+    x.setDate(x.getDate() - day);
+    return x;
+  }
+
+  function lastSession(type){
+    var matches = LOG.filter(function(s){ return s.type === type; });
+    if (!matches.length) return null;
+    matches.sort(function(a,b){
+      if (a.date === b.date) return (b._t||0) - (a._t||0);
+      return a.date < b.date ? 1 : -1;
+    });
+    return matches[0];
+  }
+
+  function lastExercise(session, name){
+    if (!session || !session.strength) return null;
+    for (var i=0;i<session.strength.length;i++){
+      if (session.strength[i].name === name) return session.strength[i];
+    }
+    return null;
+  }
+
+  // ----- Builders -----
+  function setRow(idx, last){
+    var row = document.createElement("div");
+    row.className = "set-row";
+    var wPlace = (last && last.weight!=null) ? last.weight : "";
+    var rPlace = (last && last.reps!=null) ? last.reps : "";
+    row.innerHTML =
+      '<div class="snum">' + idx + '</div>' +
+      '<div class="unit-wrap"><input type="number" class="w" inputmode="decimal" min="0" placeholder="'+wPlace+'"><span class="unit">lbs</span></div>' +
+      '<div class="unit-wrap"><input type="number" class="r" inputmode="numeric" min="0" placeholder="'+rPlace+'"><span class="unit">reps</span></div>' +
+      '<button class="x-btn rm" aria-label="Remove set">&times;</button>';
+    row.querySelector(".rm").addEventListener("click", function(){ row.remove(); });
+    return row;
+  }
+
+  function exerciseCard(opts){
+    opts = opts || {};
+    var card = document.createElement("div");
+    card.className = "ex-card";
+    var nameVal = opts.name || "";
+    var head = document.createElement("div");
+    head.className = "ex-head";
+    head.innerHTML =
+      '<input class="ex-name" type="text" placeholder="Exercise name" value="'+nameVal.replace(/"/g,'&quot;')+'">' +
+      '<button class="x-btn rm-ex" aria-label="Remove exercise">&times;</button>';
+    card.appendChild(head);
+
+    if (opts.lastSets && opts.lastSets.length){
+      var summ = opts.lastSets.map(function(s){
+        return (s.weight!=null?s.weight:"-") + "\u00d7" + (s.reps!=null?s.reps:"-");
+      }).join("  ");
+      var lastLine = document.createElement("div");
+      lastLine.className = "ex-last";
+      lastLine.innerHTML = 'Last time: <b>' + summ + '</b>';
+      card.appendChild(lastLine);
+    } else if (opts.reps){
+      var tg = document.createElement("div");
+      tg.className = "ex-last";
+      tg.innerHTML = 'Target: <b>' + opts.sets + '\u00d7' + opts.reps + '</b>';
+      card.appendChild(tg);
+    }
+
+    var headRow = document.createElement("div");
+    headRow.className = "set-head";
+    headRow.innerHTML = '<span></span><span>Weight</span><span>Reps</span><span></span>';
+    card.appendChild(headRow);
+
+    var setsWrap = document.createElement("div");
+    setsWrap.className = "sets";
+    card.appendChild(setsWrap);
+
+    var nSets = opts.sets || 1;
+    if (opts.lastSets && opts.lastSets.length > nSets) nSets = opts.lastSets.length;
+    for (var i=0;i<nSets;i++){
+      var last = (opts.lastSets && opts.lastSets[i]) ? opts.lastSets[i] : null;
+      setsWrap.appendChild(setRow(i+1, last));
+    }
+
+    var addBtn = document.createElement("button");
+    addBtn.className = "add-set";
+    addBtn.textContent = "+ Add set";
+    addBtn.addEventListener("click", function(){
+      setsWrap.appendChild(setRow(setsWrap.children.length + 1, null));
+    });
+    card.appendChild(addBtn);
+
+    head.querySelector(".rm-ex").addEventListener("click", function(){ card.remove(); });
+    return card;
+  }
+
+  function cardioCard(){
+    var card = document.createElement("div");
+    card.className = "cardio-card";
+    card.innerHTML =
+      '<div class="ch"><span>Cardio</span><button class="x-btn rm-c" aria-label="Remove cardio">&times;</button></div>' +
+      '<div class="cardio-grid">' +
+        '<div class="cc-field full"><label>Activity</label>' +
+          '<select class="c-act">' +
+            '<option>Treadmill (incline walk)</option>' +
+            '<option>Stationary Bike</option>' +
+            '<option>Walking Track</option>' +
+            '<option>Elliptical</option>' +
+            '<option>Other</option>' +
+          '</select></div>' +
+        '<div class="cc-field"><label>Minutes</label><input type="number" class="c-min" inputmode="numeric" min="0" placeholder="20"></div>' +
+        '<div class="cc-field"><label>Incline / Level</label><input type="text" class="c-lvl" placeholder="e.g. 3%"></div>' +
+        '<div class="cc-field full"><label>Distance / Laps</label><input type="text" class="c-dist" placeholder="e.g. 1.2 mi or 8 laps"></div>' +
+      '</div>';
+    card.querySelector(".rm-c").addEventListener("click", function(){ card.remove(); });
+    return card;
+  }
+
+  function coreChips(list){
+    var wrap = document.createElement("div");
+    wrap.className = "core-grid";
+    list.forEach(function(name){
+      var b = document.createElement("button");
+      b.className = "chip";
+      b.type = "button";
+      b.textContent = name;
+      b.dataset.name = name;
+      b.addEventListener("click", function(){ b.classList.toggle("on"); });
+      wrap.appendChild(b);
+    });
+    return wrap;
+  }
+
+  function sectionLabel(txt){
+    var d = document.createElement("div");
+    d.className = "flabel";
+    d.style.marginTop = "26px";
+    d.textContent = txt;
+    return d;
+  }
+
+  // ----- Render the form for a chosen type -----
+  function buildForm(type){
+    currentType = type;
+    var area = $("form-area");
+    area.innerHTML = "";
+    var conf = PROGRAM[type];
+    var last = lastSession(type);
+
+    if (conf.strength.length || type === "Free"){
+      area.appendChild(sectionLabel("Strength"));
+      var strengthWrap = document.createElement("div");
+      strengthWrap.id = "strength-wrap";
+      conf.strength.forEach(function(ex){
+        var le = lastExercise(last, ex.name);
+        strengthWrap.appendChild(exerciseCard({
+          name: ex.name, sets: ex.sets, reps: ex.reps,
+          lastSets: le ? le.sets : null
+        }));
+      });
+      area.appendChild(strengthWrap);
+
+      var addEx = document.createElement("button");
+      addEx.className = "add-ex";
+      addEx.textContent = "+ Add an exercise";
+      addEx.addEventListener("click", function(){
+        strengthWrap.appendChild(exerciseCard({ sets:3 }));
+      });
+      area.appendChild(addEx);
+    }
+
+    area.appendChild(sectionLabel("Cardio"));
+    var cardioWrap = document.createElement("div");
+    cardioWrap.id = "cardio-wrap";
+    cardioWrap.appendChild(cardioCard());
+    area.appendChild(cardioWrap);
+    var addC = document.createElement("button");
+    addC.className = "add-ex";
+    addC.textContent = "+ Add cardio";
+    addC.addEventListener("click", function(){ cardioWrap.appendChild(cardioCard()); });
+    area.appendChild(addC);
+
+    if (conf.core && conf.core.length){
+      area.appendChild(sectionLabel("Core & Mobility"));
+      var coreEl = coreChips(conf.core);
+      coreEl.id = "core-wrap";
+      area.appendChild(coreEl);
+    } else {
+      area.appendChild(sectionLabel("Core & Mobility"));
+      var coreEl2 = coreChips(["Plank","Dead Bug","Glute Bridges","Bird-Dogs"]);
+      coreEl2.id = "core-wrap";
+      area.appendChild(coreEl2);
+    }
+
+    var er = document.createElement("div");
+    er.className = "effort-row";
+    er.innerHTML = '<div class="flabel" style="margin:0;">Effort</div>' +
+      '<select id="in-rpe" style="flex:1;">' +
+        '<option value="">How did it feel</option>' +
+        '<option>2 - Very easy</option>' +
+        '<option>3 - Easy</option>' +
+        '<option>4 - Comfortable</option>' +
+        '<option>5 - Moderate</option>' +
+        '<option>6 - Working</option>' +
+        '<option>7 - Hard</option>' +
+        '<option>8 - Very hard</option>' +
+      '</select>';
+    area.appendChild(er);
+
+    area.appendChild(sectionLabel("Notes"));
+    var nt = document.createElement("textarea");
+    nt.id = "in-notes";
+    nt.placeholder = "Knees felt good. Audiobook: chapter 7. Bumped the leg press 5 lbs.";
+    area.appendChild(nt);
+
+    $("savebar").style.display = "block";
+  }
+
+  // ----- Gather + save -----
+  function gather(){
+    var strength = [];
+    var sw = $("strength-wrap");
+    if (sw){
+      Array.prototype.forEach.call(sw.querySelectorAll(".ex-card"), function(card){
+        var name = card.querySelector(".ex-name").value.trim();
+        var sets = [];
+        Array.prototype.forEach.call(card.querySelectorAll(".set-row"), function(row){
+          var w = row.querySelector(".w").value.trim();
+          var r = row.querySelector(".r").value.trim();
+          if (w !== "" || r !== ""){
+            sets.push({ weight: w===""?null:+w, reps: r===""?null:+r });
+          }
+        });
+        if (name && sets.length) strength.push({ name:name, sets:sets });
+      });
+    }
+
+    var cardio = [];
+    var cw = $("cardio-wrap");
+    if (cw){
+      Array.prototype.forEach.call(cw.querySelectorAll(".cardio-card"), function(card){
+        var act = card.querySelector(".c-act").value;
+        var min = card.querySelector(".c-min").value.trim();
+        var lvl = card.querySelector(".c-lvl").value.trim();
+        var dist = card.querySelector(".c-dist").value.trim();
+        if (min !== "" || dist !== "" || lvl !== ""){
+          cardio.push({ act:act, min: min===""?null:+min, lvl:lvl, dist:dist });
+        }
+      });
+    }
+
+    var core = [];
+    var core_w = $("core-wrap");
+    if (core_w){
+      Array.prototype.forEach.call(core_w.querySelectorAll(".chip.on"), function(c){
+        core.push(c.dataset.name);
+      });
+    }
+
+    var rpeEl = $("in-rpe");
+    var notesEl = $("in-notes");
+    return {
+      type: currentType,
+      date: $("in-date").value,
+      _t: Date.now(),
+      strength: strength,
+      cardio: cardio,
+      core: core,
+      rpe: rpeEl ? rpeEl.value : "",
+      notes: notesEl ? notesEl.value.trim() : ""
+    };
+  }
+
+  function hasContent(s){
+    return s.strength.length || s.cardio.length || s.core.length || s.notes;
+  }
+
+  async function saveSession(){
+    var s = gather();
+    if (!s.date){ toast("Pick a date first"); return; }
+    if (!hasContent(s)){ toast("Log at least one set or cardio entry"); return; }
+    LOG.push(s);
+    var ok = await Store.save(LOG);
+    toast(ok ? "Session logged" : "Saved for now (storage unavailable)");
+    currentType = null;
+    $("form-area").innerHTML = "";
+    $("savebar").style.display = "none";
+    clearTypeButtons();
+    renderHistory();
+    switchView("hist");
+  }
+
+  function clearTypeButtons(){
+    Array.prototype.forEach.call(document.querySelectorAll(".types button"), function(b){
+      b.classList.remove("active");
+    });
+  }
+
+  // ----- History rendering -----
+  function summarize(s){
+    var bits = [];
+    if (s.strength.length){
+      bits.push(s.strength.length + " lift" + (s.strength.length>1?"s":""));
+    }
+    var totMin = s.cardio.reduce(function(a,c){ return a + (c.min||0); }, 0);
+    if (totMin) bits.push(totMin + " min cardio");
+    else if (s.cardio.length) bits.push("cardio");
+    if (s.core.length) bits.push(s.core.length + " core");
+    return bits.join("  \u00b7  ") || "session";
+  }
+
+  function renderHistory(){
+    var stats = $("stats");
+    var sow = startOfWeek(new Date());
+    var thisWeek = LOG.filter(function(s){
+      var p = s.date.split("-");
+      var d = new Date(+p[0], +p[1]-1, +p[2]);
+      return d >= sow;
+    }).length;
+    stats.innerHTML =
+      '<div class="stat"><div class="num">' + thisWeek + '<small> / 4</small></div><div class="lbl">This Week</div></div>' +
+      '<div class="stat"><div class="num">' + LOG.length + '</div><div class="lbl">Total Logged</div></div>';
+
+    var list = $("hist-list");
+    if (!LOG.length){
+      list.innerHTML = '<div class="empty"><div class="e-mark">&sect;</div><p>No sessions yet. Your first entry starts the record.</p></div>';
+      $("reset-btn").style.display = "none";
+      return;
+    }
+    $("reset-btn").style.display = "block";
+
+    var sorted = LOG.slice().sort(function(a,b){
+      if (a.date === b.date) return (b._t||0) - (a._t||0);
+      return a.date < b.date ? 1 : -1;
+    });
+
+    list.innerHTML = "";
+    sorted.forEach(function(s){
+      var item = document.createElement("div");
+      item.className = "h-item";
+      var badgeClass = s.type === "A" ? "b-A" : (s.type === "B" ? "b-B" : "");
+      var top = document.createElement("div");
+      top.className = "h-top";
+      top.innerHTML =
+        '<div class="h-badge '+badgeClass+'">'+ s.type +'</div>' +
+        '<div class="h-meta"><div class="h-date">'+ fmtDate(s.date) +'</div>' +
+        '<div class="h-sum">'+ summarize(s) +'</div></div>' +
+        '<div class="h-chev">&#9660;</div>';
+      top.addEventListener("click", function(){ item.classList.toggle("open"); });
+      item.appendChild(top);
+
+      var body = document.createElement("div");
+      body.className = "h-body";
+      var html = "";
+
+      if (s.strength.length){
+        html += '<div class="h-section-tag">Strength</div>';
+        s.strength.forEach(function(ex){
+          var v = ex.sets.map(function(st){
+            return (st.weight!=null?st.weight:"-") + "\u00d7" + (st.reps!=null?st.reps:"-");
+          }).join(", ");
+          html += '<div class="h-line"><span class="hl-name">'+ ex.name +'</span><span class="hl-val">'+ v +'</span></div>';
+        });
+      }
+      if (s.cardio.length){
+        html += '<div class="h-section-tag">Cardio</div>';
+        s.cardio.forEach(function(c){
+          var parts = [];
+          if (c.min!=null) parts.push(c.min + " min");
+          if (c.lvl) parts.push(c.lvl);
+          if (c.dist) parts.push(c.dist);
+          html += '<div class="h-line"><span class="hl-name">'+ c.act +'</span><span class="hl-val">'+ parts.join(" &middot; ") +'</span></div>';
+        });
+      }
+      if (s.core.length){
+        html += '<div class="h-section-tag">Core</div>';
+        html += '<div class="h-line"><span class="hl-name" style="font-size:14px;">'+ s.core.join(", ") +'</span></div>';
+      }
+      if (s.rpe){
+        html += '<div class="h-line"><span class="hl-name" style="font-size:14px;color:var(--muted);">Effort</span><span class="hl-val">'+ s.rpe +'</span></div>';
+      }
+      if (s.notes){
+        html += '<div class="h-notes">&ldquo;'+ s.notes.replace(/</g,"&lt;") +'&rdquo;</div>';
+      }
+      body.innerHTML = html;
+
+      var del = document.createElement("button");
+      del.className = "del";
+      del.textContent = "Delete this session";
+      del.addEventListener("click", function(){
+        if (del.classList.contains("armed")){
+          var idx = LOG.indexOf(s);
+          if (idx > -1) LOG.splice(idx, 1);
+          Store.save(LOG);
+          renderHistory();
+        } else {
+          del.classList.add("armed");
+          del.textContent = "Tap again to confirm";
+          setTimeout(function(){
+            del.classList.remove("armed");
+            del.textContent = "Delete this session";
+          }, 2600);
+        }
+      });
+      body.appendChild(del);
+      item.appendChild(body);
+      list.appendChild(item);
+    });
+  }
+
+  // ----- View switching -----
+  function switchView(which){
+    var isLog = which === "log";
+    $("view-log").classList.toggle("show", isLog);
+    $("view-hist").classList.toggle("show", !isLog);
+    $("tab-log").classList.toggle("active", isLog);
+    $("tab-hist").classList.toggle("active", !isLog);
+    $("savebar").style.display = (isLog && currentType) ? "block" : "none";
+    window.scrollTo(0,0);
+  }
+
+  var toastTimer;
+  function toast(msg){
+    var t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2400);
+  }
+
+  // ----- Init -----
+  async function init(){
+    LOG = await Store.load();
+    $("loading").style.display = "none";
+
+    var today = new Date();
+    var iso = today.getFullYear() + "-" +
+      String(today.getMonth()+1).padStart(2,"0") + "-" +
+      String(today.getDate()).padStart(2,"0");
+    $("in-date").value = iso;
+
+    $("tab-log").addEventListener("click", function(){ switchView("log"); });
+    $("tab-hist").addEventListener("click", function(){ switchView("hist"); });
+
+    Array.prototype.forEach.call(document.querySelectorAll(".types button"), function(b){
+      b.addEventListener("click", function(){
+        clearTypeButtons();
+        b.classList.add("active");
+        buildForm(b.dataset.type);
+        b.scrollIntoView({behavior:"smooth", block:"nearest"});
+      });
+    });
+
+    $("save-btn").addEventListener("click", saveSession);
+
+    var resetBtn = $("reset-btn");
+    resetBtn.addEventListener("click", function(){
+      if (resetBtn.classList.contains("armed")){
+        LOG = [];
+        Store.save(LOG);
+        renderHistory();
+        resetBtn.classList.remove("armed");
+        resetBtn.textContent = "Erase all records";
+      } else {
+        resetBtn.classList.add("armed");
+        resetBtn.textContent = "Tap again to erase everything";
+        setTimeout(function(){
+          resetBtn.classList.remove("armed");
+          resetBtn.textContent = "Erase all records";
+        }, 2600);
+      }
+    });
+
+    renderHistory();
+    switchView("log");
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
