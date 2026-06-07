@@ -186,6 +186,33 @@
   .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);z-index:20;background:var(--surface-2);border:1px solid var(--brass-deep);color:var(--brass-bright);font-family:var(--mono);font-size:12.5px;letter-spacing:0.04em;padding:12px 20px;border-radius:10px;opacity:0;pointer-events:none;transition:all .35s ease;box-shadow:0 8px 30px rgba(0,0,0,0.5);}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   .loading{text-align:center;padding:60px 0;color:var(--muted);font-family:var(--mono);font-size:12px;letter-spacing:0.1em;}
+
+  /* added: checklists, cues, badges, prompt */
+  .checklist{display:flex;flex-direction:column;gap:8px;margin:0 0 6px;}
+  .check-row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;padding:12px 14px;cursor:pointer;font-family:var(--sans);transition:background .15s,border-color .15s;}
+  .check-row .cbox{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#241a07;font-size:13px;font-weight:800;transition:all .15s;}
+  .check-row.on{background:var(--surface-2);border-color:var(--sage);}
+  .check-row.on .cbox{background:var(--sage);border-color:var(--sage);}
+  .check-row.on .cbox::after{content:"\2713";}
+  .check-row .ctext{display:flex;flex-direction:column;}
+  .check-row .cname{font-weight:600;font-size:14.5px;color:var(--paper);}
+  .check-row .cdet{font-size:12px;color:var(--muted);margin-top:1px;}
+  .knee-row{margin-top:8px;}
+  .knee-row.on{border-color:var(--brass-deep);}
+  .knee-row.on .cbox{background:var(--brass);border-color:var(--brass);border-radius:50%;}
+  .knee-row.on .cbox::after{content:"!";}
+  .ex-badge{background:rgba(201,162,75,0.12);border:1px solid var(--brass-deep);color:var(--brass-bright);font-size:12.5px;font-weight:600;padding:8px 11px;border-radius:9px;margin:-4px 0 12px;}
+  .ex-cue{background:var(--ink-2);border-left:3px solid var(--brass-deep);border-radius:8px;padding:9px 12px;font-size:12.5px;color:var(--paper-dim);margin:0 0 12px;line-height:1.45;}
+  .ex-alert{background:rgba(201,162,75,0.10);border:1px solid var(--brass-deep);color:var(--brass-bright);font-size:13px;padding:11px 13px;border-radius:11px;margin:0 0 6px;line-height:1.45;}
+  .ex-alert b{color:var(--brass-bright);font-weight:700;}
+  .h-knee{font-size:12.5px;color:var(--brass-bright);font-weight:600;margin-top:8px;}
+  .prompt-card{background:linear-gradient(135deg, var(--surface-2), var(--ink-2));border:1px solid var(--brass-deep);border-radius:14px;padding:16px;margin:0 0 20px;}
+  .prompt-card .pc-h{font-family:var(--serif);font-weight:600;font-size:17px;color:var(--brass-bright);margin-bottom:6px;}
+  .prompt-card .pc-b{font-size:13px;color:var(--paper-dim);line-height:1.5;margin-bottom:13px;}
+  .prompt-card .pc-btn{appearance:none;border:none;background:var(--brass);color:#241a07;font-family:var(--sans);font-weight:700;font-size:13px;padding:10px 16px;border-radius:10px;cursor:pointer;}
+  .data-actions{display:flex;gap:10px;margin:18px 0 4px;}
+  .data-btn{flex:1;appearance:none;background:var(--surface);border:1px solid var(--line-soft);border-radius:11px;color:var(--paper-dim);font-family:var(--sans);font-weight:600;font-size:13px;padding:12px;cursor:pointer;transition:all .15s;}
+  .data-btn:hover{border-color:var(--brass-deep);color:var(--brass);}
 </style>
 </head>
 <body>
@@ -214,6 +241,8 @@
       </div>
     </div>
 
+    <div id="prog-prompt"></div>
+
     <div class="flabel">Today's Session</div>
     <div class="types">
       <button data-type="A"><span class="t-tag">A</span><span class="t-sub">Strength + Cardio</span></button>
@@ -229,6 +258,10 @@
     <div id="stats" class="stats"></div>
     <div class="flabel">The Record</div>
     <div id="hist-list"></div>
+    <div class="data-actions">
+      <button id="export-btn" class="data-btn">Export backup</button>
+      <button id="import-btn" class="data-btn">Import backup</button>
+    </div>
     <button id="reset-btn" class="reset">Erase all records</button>
   </section>
 </div>
@@ -250,14 +283,28 @@
   var memFallback = [];
 
   var PROGRAM = {
+    warmup: [
+      { name:"Easy cardio or bike to warm up", d:"5 minutes" },
+      { name:"Arm circles", d:"10 each direction" },
+      { name:"Leg swings", d:"10 each leg" },
+      { name:"Ankle circles", d:"10 each" },
+      { name:"Bodyweight quarter-squats", d:"10 reps" }
+    ],
+    cooldown: [
+      { name:"Calf stretch", d:"20-30 sec each" },
+      { name:"Hamstring stretch", d:"20-30 sec each" },
+      { name:"Hip flexor stretch", d:"20-30 sec each" },
+      { name:"Chest / doorway stretch", d:"20-30 sec" },
+      { name:"Shoulder cross-body stretch", d:"20-30 sec each" }
+    ],
     A: {
       strength: [
-        { name:"Leg Press",   sets:3, reps:"10-12" },
-        { name:"Chest Press", sets:3, reps:"10-12" },
-        { name:"Seated Row",  sets:3, reps:"10-12" },
-        { name:"Lat Pulldown",sets:3, reps:"10-12" },
-        { name:"Leg Curl",    sets:2, reps:"10-12" },
-        { name:"Calf Raise",  sets:2, reps:"12-15" }
+        { name:"Leg Press",    sets:3, reps:"10-12", top:12, cue:"Feet mid-platform, knees tracking over toes. Don't lock the knees hard at the top." },
+        { name:"Chest Press",  sets:3, reps:"10-12", top:12, cue:"Shoulders down and back. Lower slowly; don't snap the elbows locked." },
+        { name:"Seated Row",   sets:3, reps:"10-12", top:12, cue:"Lead with the elbows, squeeze the shoulder blades. No rocking with the lower back." },
+        { name:"Lat Pulldown", sets:3, reps:"10-12", top:12, cue:"Pull to the upper chest, not behind the neck. Control the bar back up." },
+        { name:"Leg Curl",     sets:2, reps:"10-12", top:12, cue:"Hips down, slow on the way back. No swinging." },
+        { name:"Calf Raise",   sets:2, reps:"12-15", top:15, cue:"Full range, pause at the top, stretch at the bottom." }
       ],
       cardio:1,
       core:["Plank","Dead Bug"]
@@ -367,6 +414,19 @@
       card.appendChild(tg);
     }
 
+    if (opts.hit){
+      var bdg = document.createElement("div");
+      bdg.className = "ex-badge";
+      bdg.textContent = "You hit your target last time. Consider adding weight.";
+      card.appendChild(bdg);
+    }
+    if (opts.cue){
+      var cu = document.createElement("div");
+      cu.className = "ex-cue";
+      cu.textContent = opts.cue;
+      card.appendChild(cu);
+    }
+
     var headRow = document.createElement("div");
     headRow.className = "set-head";
     headRow.innerHTML = '<span></span><span>Weight</span><span>Reps</span><span></span>';
@@ -432,6 +492,30 @@
     return wrap;
   }
 
+  function hitTarget(top, lastSets){
+    if (!top || !lastSets || !lastSets.length) return false;
+    for (var i=0;i<lastSets.length;i++){
+      if (!(Number(lastSets[i].reps) >= top)) return false;
+    }
+    return true;
+  }
+
+  function checklist(list){
+    var wrap = document.createElement("div");
+    wrap.className = "checklist";
+    list.forEach(function(item, i){
+      var row = document.createElement("button");
+      row.className = "check-row";
+      row.type = "button";
+      row.dataset.idx = i;
+      row.dataset.name = item.name;
+      row.innerHTML = '<span class="cbox"></span><span class="ctext"><span class="cname">'+item.name.replace(/</g,"&lt;")+'</span><span class="cdet">'+item.d.replace(/</g,"&lt;")+'</span></span>';
+      row.addEventListener("click", function(){ row.classList.toggle("on"); });
+      wrap.appendChild(row);
+    });
+    return wrap;
+  }
+
   function sectionLabel(txt){
     var d = document.createElement("div");
     d.className = "flabel";
@@ -448,6 +532,23 @@
     var conf = PROGRAM[type];
     var last = lastSession(type);
 
+    area.appendChild(sectionLabel("Warm-Up"));
+    var wu = checklist(PROGRAM.warmup); wu.id = "warmup-wrap"; area.appendChild(wu);
+
+    if (type === "A"){
+      var knee = document.createElement("button");
+      knee.className = "check-row knee-row"; knee.type = "button"; knee.id = "knee-toggle";
+      knee.innerHTML = '<span class="cbox"></span><span class="ctext"><span class="cname">Knee discomfort today?</span><span class="cdet">Tap if your knees are bothering you</span></span>';
+      area.appendChild(knee);
+      var ka = document.createElement("div"); ka.className = "ex-alert"; ka.id = "knee-alert"; ka.style.display = "none";
+      ka.innerHTML = '<b>Go easy on the knees.</b> Lighten the Leg Press and shorten the range, or skip it and add a set of Leg Curls. Keep every movement pain-free.';
+      area.appendChild(ka);
+      knee.addEventListener("click", function(){
+        knee.classList.toggle("on");
+        ka.style.display = knee.classList.contains("on") ? "block" : "none";
+      });
+    }
+
     if (conf.strength.length || type === "Free"){
       area.appendChild(sectionLabel("Strength"));
       var strengthWrap = document.createElement("div");
@@ -455,7 +556,8 @@
       conf.strength.forEach(function(ex){
         var le = lastExercise(last, ex.name);
         strengthWrap.appendChild(exerciseCard({
-          name: ex.name, sets: ex.sets, reps: ex.reps,
+          name: ex.name, sets: ex.sets, reps: ex.reps, cue: ex.cue,
+          hit: hitTarget(ex.top, le ? le.sets : null),
           lastSets: le ? le.sets : null
         }));
       });
@@ -492,6 +594,9 @@
       coreEl2.id = "core-wrap";
       area.appendChild(coreEl2);
     }
+
+    area.appendChild(sectionLabel("Cool-Down"));
+    var cd = checklist(PROGRAM.cooldown); cd.id = "cooldown-wrap"; area.appendChild(cd);
 
     var er = document.createElement("div");
     er.className = "effort-row";
@@ -558,22 +663,39 @@
       });
     }
 
+    var warmup = [];
+    var wuw = $("warmup-wrap");
+    if (wuw){ Array.prototype.forEach.call(wuw.querySelectorAll(".check-row.on"), function(r){ warmup.push(r.dataset.name); }); }
+
+    var cooldown = [];
+    var cdw = $("cooldown-wrap");
+    if (cdw){ Array.prototype.forEach.call(cdw.querySelectorAll(".check-row.on"), function(r){ cooldown.push(r.dataset.name); }); }
+
+    var kneeEl = $("knee-toggle");
+    var knee = kneeEl ? kneeEl.classList.contains("on") : false;
+
     var rpeEl = $("in-rpe");
     var notesEl = $("in-notes");
+    var notes = notesEl ? notesEl.value.trim() : "";
+    if (/knee/i.test(notes)) knee = true;
     return {
       type: currentType,
       date: $("in-date").value,
       _t: Date.now(),
+      warmup: warmup,
       strength: strength,
       cardio: cardio,
       core: core,
+      cooldown: cooldown,
       rpe: rpeEl ? rpeEl.value : "",
-      notes: notesEl ? notesEl.value.trim() : ""
+      knee: knee,
+      notes: notes
     };
   }
 
   function hasContent(s){
-    return s.strength.length || s.cardio.length || s.core.length || s.notes;
+    return s.strength.length || s.cardio.length || s.core.length || s.notes ||
+           (s.warmup && s.warmup.length) || (s.cooldown && s.cooldown.length);
   }
 
   async function saveSession(){
@@ -595,6 +717,32 @@
     Array.prototype.forEach.call(document.querySelectorAll(".types button"), function(b){
       b.classList.remove("active");
     });
+  }
+
+  // ----- Two-week progression check-in -----
+  var PKEY = "cole-training-prog";
+  function progLast(){ try { return localStorage.getItem(PKEY) || null; } catch(e){ return null; } }
+  function progSet(){ try { localStorage.setItem(PKEY, new Date().toISOString()); } catch(e){} }
+  function progressionDue(){
+    if (!LOG.length) return false;
+    var DAY = 86400000, now = Date.now();
+    var last = progLast();
+    if (last) return (now - new Date(last).getTime()) >= 14*DAY;
+    var first = LOG.reduce(function(a,s){ var p=s.date.split("-"); var t=new Date(+p[0],+p[1]-1,+p[2]).getTime(); return t<a?t:a; }, Infinity);
+    return (now - first) >= 14*DAY;
+  }
+  function renderPrompt(){
+    var el = $("prog-prompt");
+    if (!el) return;
+    if (progressionDue()){
+      el.innerHTML = '<div class="prompt-card"><div class="pc-h">Two-week check-in</div>'+
+        '<div class="pc-b">Time for a small nudge. Pick one: add a rep to any lift, bump a weight by the smallest increment, or add 5 seconds to your plank.</div>'+
+        '<button class="pc-btn" id="prog-ok">Got it</button></div>';
+      var ok = $("prog-ok");
+      if (ok) ok.addEventListener("click", function(){ progSet(); renderPrompt(); });
+    } else {
+      el.innerHTML = "";
+    }
   }
 
   // ----- History rendering -----
@@ -680,6 +828,14 @@
       if (s.rpe){
         html += '<div class="h-line"><span class="hl-name" style="font-size:14px;color:var(--muted);">Effort</span><span class="hl-val">'+ s.rpe +'</span></div>';
       }
+      var wuN = (s.warmup && s.warmup.length) || 0;
+      var cdN = (s.cooldown && s.cooldown.length) || 0;
+      if (wuN || cdN){
+        html += '<div class="h-line"><span class="hl-name" style="font-size:14px;color:var(--muted);">Warm-up / Cool-down</span><span class="hl-val">'+ wuN +'/'+ PROGRAM.warmup.length +' &middot; '+ cdN +'/'+ PROGRAM.cooldown.length +'</span></div>';
+      }
+      if (s.knee){
+        html += '<div class="h-knee">&#9888; Knee discomfort flagged</div>';
+      }
       if (s.notes){
         html += '<div class="h-notes">&ldquo;'+ s.notes.replace(/</g,"&lt;") +'&rdquo;</div>';
       }
@@ -717,6 +873,7 @@
     $("tab-log").classList.toggle("active", isLog);
     $("tab-hist").classList.toggle("active", !isLog);
     $("savebar").style.display = (isLog && currentType) ? "block" : "none";
+    if (isLog) renderPrompt();
     window.scrollTo(0,0);
   }
 
@@ -727,6 +884,51 @@
     t.classList.add("show");
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2400);
+  }
+
+  // ----- Backup: export / import -----
+  var APPID = "training-log";
+  function download(name, text){
+    var blob = new Blob([text], {type:"application/json"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+  }
+  function exportData(){
+    var d = new Date();
+    var stamp = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    var payload = { app:APPID, version:1, exportedAt:d.toISOString(), sessions:LOG };
+    download("training-log-backup-"+stamp+".json", JSON.stringify(payload, null, 2));
+    toast(LOG.length ? ("Exported "+LOG.length+" session"+(LOG.length>1?"s":"")) : "Exported an empty backup");
+  }
+  function pickImport(){
+    var inp = document.createElement("input");
+    inp.type = "file"; inp.accept = "application/json,.json";
+    inp.addEventListener("change", function(){ if (inp.files && inp.files[0]) importData(inp.files[0]); });
+    inp.click();
+  }
+  function importData(file){
+    var reader = new FileReader();
+    reader.onload = function(){
+      var data;
+      try { data = JSON.parse(reader.result); } catch(e){ toast("Couldn't read that file"); return; }
+      if (data && data.app && data.app !== APPID){ toast("That backup is from a different tracker"); return; }
+      var arr = Array.isArray(data) ? data : (data && data.sessions);
+      if (!Array.isArray(arr)){ toast("No sessions found in that file"); return; }
+      var seen = {}; LOG.forEach(function(s){ if (s._t) seen[s._t] = true; });
+      var added = 0;
+      arr.forEach(function(s){
+        if (!s || typeof s !== "object" || !s.date) return;
+        if (s._t && seen[s._t]) return;
+        LOG.push(s); if (s._t) seen[s._t] = true; added++;
+      });
+      Store.save(LOG);
+      renderHistory();
+      toast(added ? ("Imported "+added+" session"+(added>1?"s":"")) : "Already up to date");
+    };
+    reader.readAsText(file);
   }
 
   // ----- Init -----
@@ -754,6 +956,9 @@
 
     $("save-btn").addEventListener("click", saveSession);
 
+    var exB = $("export-btn"); if (exB) exB.addEventListener("click", exportData);
+    var imB = $("import-btn"); if (imB) imB.addEventListener("click", pickImport);
+
     var resetBtn = $("reset-btn");
     resetBtn.addEventListener("click", function(){
       if (resetBtn.classList.contains("armed")){
@@ -772,6 +977,7 @@
       }
     });
 
+    renderPrompt();
     renderHistory();
     switchView("log");
   }
