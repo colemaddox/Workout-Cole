@@ -359,7 +359,7 @@
 
 <div class="rest-chip" id="rest-chip" style="display:none;" role="timer">
   <span class="rc-label">REST</span>
-  <span class="rc-time" id="rc-time">1:30</span>
+  <span class="rc-time" id="rc-time">0:30</span>
   <button type="button" class="rc-btn" id="rc-add">+30s</button>
   <button type="button" class="rc-btn" id="rc-skip">skip</button>
   <div class="rc-bar" id="rc-bar"></div>
@@ -432,7 +432,7 @@
     var out = {
       type: (s.type === "A" || s.type === "B" || s.type === "Free") ? s.type : "Free",
       date: s.date,
-      _t: (typeof s._t === "number" && s._t > 0) ? s._t : null,
+      _t: (typeof s._t === "number" && isFinite(s._t) && s._t > 0) ? s._t : null,
       warmup: Array.isArray(s.warmup) ? s.warmup.map(String) : [],
       strength: [],
       cardio: [],
@@ -548,9 +548,10 @@
     return x;
   }
 
-  function lastSession(type, excludeT){
+  function lastSession(type, excludeT, beforeDate){
     var matches = LOG.filter(function(s){
-      return s.type === type && (excludeT == null || s._t !== excludeT);
+      return s.type === type && (excludeT == null || s._t !== excludeT) &&
+        (beforeDate == null || s.date < beforeDate);
     });
     if (!matches.length) return null;
     matches.sort(function(a,b){
@@ -575,8 +576,9 @@
   function validCycle(c){
     return c && typeof c === "object" &&
       typeof c.start === "string" && /^\d{4}-\d{2}-\d{2}$/.test(c.start) &&
-      typeof c.num === "number" && c.num >= 1 &&
-      typeof c.weeklyGoal === "number" && c.weeklyGoal >= 2 && c.weeklyGoal <= 7;
+      typeof c.num === "number" && isFinite(c.num) && c.num === Math.floor(c.num) && c.num >= 1 &&
+      typeof c.weeklyGoal === "number" && isFinite(c.weeklyGoal) && c.weeklyGoal === Math.floor(c.weeklyGoal) &&
+      c.weeklyGoal >= 2 && c.weeklyGoal <= 7;
   }
   function cycleLoad(){
     try {
@@ -671,6 +673,8 @@
   function completeSet(row, last){
     var stamp = row.querySelector(".stamp");
     if (!row.classList.contains("done")){
+      row.classList.add("done");
+      if (stamp) stamp.setAttribute("aria-pressed","true");
       // when amending a record, never inject another session's numbers or start a timer
       if (!editing){
         var w = row.querySelector(".w"), r = row.querySelector(".r");
@@ -678,10 +682,15 @@
           if (w.value === "" && last.weight != null) w.value = last.weight;
           if (r.value === "" && last.reps != null) r.value = last.reps;
         }
-        startRest();
+        // last set of the exercise done -> longer rest into the next exercise
+        var wrap = row.parentNode;
+        var rows = wrap ? wrap.querySelectorAll(".set-row") : [];
+        var allDone = rows.length > 0;
+        for (var i=0;i<rows.length;i++){
+          if (!rows[i].classList.contains("done")){ allDone = false; break; }
+        }
+        startRest(allDone ? REST_EX : REST_SET, allDone ? "NEXT EXERCISE" : "REST");
       }
-      row.classList.add("done");
-      if (stamp) stamp.setAttribute("aria-pressed","true");
     } else {
       row.classList.remove("done");
       if (stamp) stamp.setAttribute("aria-pressed","false");
@@ -734,17 +743,24 @@
         return (s.weight!=null?esc(s.weight):"-") + "×" + (s.reps!=null?esc(s.reps):"-");
       }).join("  ");
       var lastLine = document.createElement("div");
-      lastLine.className = "ex-last fillable";
-      lastLine.innerHTML = 'Last time: <b>' + summ + '</b><span class="fill-cue">&#8635; tap to use</span>';
-      lastLine.addEventListener("click", function(){
-        Array.prototype.forEach.call(setsWrap.querySelectorAll(".set-row"), function(r, i){
-          var src = opts.lastSets[i];
-          if (!src) return;
-          var w = r.querySelector(".w"), rp = r.querySelector(".r");
-          if (w.value === "" && src.weight != null) w.value = src.weight;
-          if (rp.value === "" && src.reps != null) rp.value = src.reps;
+      if (editing){
+        // context only while amending — never a tap target that injects
+        // another session's numbers into the record being edited
+        lastLine.className = "ex-last";
+        lastLine.innerHTML = 'Previous session: <b>' + summ + '</b>';
+      } else {
+        lastLine.className = "ex-last fillable";
+        lastLine.innerHTML = 'Last time: <b>' + summ + '</b><span class="fill-cue">&#8635; tap to use</span>';
+        lastLine.addEventListener("click", function(){
+          Array.prototype.forEach.call(setsWrap.querySelectorAll(".set-row"), function(r, i){
+            var src = opts.lastSets[i];
+            if (!src) return;
+            var w = r.querySelector(".w"), rp = r.querySelector(".r");
+            if (w.value === "" && src.weight != null) w.value = src.weight;
+            if (rp.value === "" && src.reps != null) rp.value = src.reps;
+          });
         });
-      });
+      }
       card.appendChild(lastLine);
     } else if (opts.reps){
       var tg = document.createElement("div");
@@ -938,7 +954,8 @@
     var area = $("form-area");
     area.innerHTML = "";
     var conf = PROGRAM[type];
-    var last = lastSession(type, editing ? editing._t : null);
+    // when amending, "last time" means the session BEFORE this one, never a later one
+    var last = lastSession(type, editing ? editing._t : null, editing ? editing.date : null);
 
     if (editing){
       var bn = document.createElement("div");
@@ -1248,7 +1265,9 @@
       LOG.push(s);
     }
     var ok = Store.save(LOG);
-    if (!wasEdit) clearDraft(); // a draft never belongs to an edit — don't destroy it
+    // a draft never belongs to an edit; and if the save failed, the draft is the
+    // only durable copy of this workout — keep it so Resume still works
+    if (!wasEdit && ok) clearDraft();
     stopRest();
 
     var msg;
@@ -1364,6 +1383,9 @@
       if (s && s.to) suggs.push({ name: ex.name, s: s });
     });
     if (suggs.length){
+      // the suggestions card fulfills the periodic-nudge role; stamp the check-in
+      // so it can't resurface months overdue the moment suggestions briefly vanish
+      if (progressionDue()) progSet();
       el.innerHTML = '<div class="prompt-card"><div class="pc-h">Progression ready</div>' +
         '<div class="pc-b">Earned on your last A session — these will pre-fill when you start:</div>' +
         '<div class="pc-list">' + suggs.map(function(x){
@@ -1863,8 +1885,8 @@
   }
 
   // ----- Rest timer -----
-  var REST_DEFAULT = 90;
-  var restDur = REST_DEFAULT, restEndAt = 0, restTimer = null, audioCtx = null;
+  var REST_SET = 30, REST_EX = 60; // between sets / between exercises
+  var restDur = REST_SET, restEndAt = 0, restTimer = null, audioCtx = null;
   function ensureAudio(){
     try {
       var AC = window.AudioContext || window.webkitAudioContext;
@@ -1888,11 +1910,13 @@
       });
     } catch(e){}
   }
-  function startRest(){
+  function startRest(dur, label){
     ensureAudio(); // inside the tap gesture so iOS allows the later beep
-    restDur = REST_DEFAULT; // +30s extensions apply to one rest only
+    restDur = dur || REST_SET; // +30s extensions apply to one rest only
     restEndAt = Date.now() + restDur * 1000;
     var chip = $("rest-chip");
+    var lbl = chip.querySelector(".rc-label");
+    if (lbl) lbl.textContent = label || "REST";
     chip.classList.remove("over");
     chip.style.display = "flex";
     clearInterval(restTimer);
@@ -1917,7 +1941,8 @@
     $("rc-bar").style.width = "0%";
     if (navigator.vibrate){ try { navigator.vibrate([200,100,200]); } catch(e){} }
     beep();
-    setTimeout(function(){ if (!restEndAt) chip.style.display = "none"; }, 4000);
+    // don't let the GO state expire invisibly while the tab is backgrounded
+    setTimeout(function(){ if (!restEndAt && !document.hidden) chip.style.display = "none"; }, 4000);
   }
   function stopRest(){
     clearInterval(restTimer);
@@ -1963,28 +1988,34 @@
       var arr = Array.isArray(data) ? data : (data && data.sessions);
       if (!Array.isArray(arr)){ toast("No sessions found in that file"); return; }
 
-      var seenT = {}, seenKey = {};
-      LOG.forEach(function(s){
-        if (s._t) seenT[s._t] = true;
+      var byT = {}, seenKey = {};
+      LOG.forEach(function(s, i){
+        if (s._t) byT[s._t] = i;
         seenKey[contentKey(s)] = true;
       });
-      var added = 0, skippedBad = 0;
+      var added = 0, updated = 0, skippedBad = 0;
       arr.forEach(function(raw){
         var s = normalizeSession(raw);
         if (!s){ skippedBad++; return; }
-        if (s._t && seenT[s._t]) return;
+        if (s._t && byT[s._t] != null){
+          // same identity: adopt the backup's copy only when it is a NEWER edit
+          var cur = LOG[byT[s._t]];
+          if ((s._edited||0) > (cur._edited||0)){ LOG[byT[s._t]] = s; updated++; }
+          return;
+        }
         var k = contentKey(s);
         if (seenKey[k]) return;
         if (!s._t) s._t = freshT();
         LOG.push(s);
-        seenT[s._t] = true;
+        byT[s._t] = LOG.length - 1;
         seenKey[k] = true;
         added++;
       });
-      if (data && validCycle(data.cycle)){
-        // grid math assumes a Monday anchor — snap foreign starts to one
+      // adopt the backup's cycle only when it is AHEAD of the local one — restoring
+      // an old backup must not rewind the current cycle number, anchor, or goal
+      if (data && validCycle(data.cycle) && (!validCycle(CYCLE) || data.cycle.num > CYCLE.num)){
         CYCLE = {
-          start: isoOf(startOfWeek(parseISO(data.cycle.start))),
+          start: isoOf(startOfWeek(parseISO(data.cycle.start))), // grid math assumes a Monday anchor
           num: data.cycle.num,
           weeklyGoal: data.cycle.weeklyGoal
         };
@@ -1993,9 +2024,11 @@
       }
       var okImp = Store.save(LOG);
       renderHistory();
-      var msg = added ? ("Imported " + added + " session" + (added > 1 ? "s" : "")) : "Already up to date";
+      var msg = added ? ("Imported " + added + " session" + (added > 1 ? "s" : "")) : (updated ? "" : "Already up to date");
+      if (updated) msg += (msg ? " · " : "") + "updated " + updated;
+      if (!msg) msg = "Already up to date";
       if (skippedBad) msg += " · skipped " + skippedBad + " malformed";
-      if (added && !okImp) msg += " — saved for this visit only";
+      if ((added || updated) && !okImp) msg += " — saved for this visit only";
       toast(msg);
     };
     reader.readAsText(file);
@@ -2077,7 +2110,25 @@
       stopRest();
     });
     document.addEventListener("visibilitychange", function(){
-      if (!document.hidden && restEndAt) tickRest();
+      if (document.hidden) return;
+      if (restEndAt){ tickRest(); return; }
+      // the rest finished while backgrounded: show GO now, then hide
+      var chip = $("rest-chip");
+      if (chip.classList.contains("over") && chip.style.display !== "none"){
+        setTimeout(function(){ if (!restEndAt) chip.style.display = "none"; }, 4000);
+      }
+    });
+    // multi-tab safety: when another tab writes the store, refresh this one's view
+    // while idle instead of later clobbering it with a stale snapshot
+    window.addEventListener("storage", function(e){
+      if (e.key === KEY && !currentType && !editing){
+        LOG = Store.load();
+        LOG.forEach(function(s){ if (s._t && s._t > lastT) lastT = s._t; });
+        ensureCycle();
+        updateCycleTag();
+        renderHistory();
+        renderPrompt();
+      }
     });
 
     var exB = $("export-btn"); if (exB) exB.addEventListener("click", exportData);
@@ -2088,6 +2139,9 @@
       if (resetBtn.classList.contains("armed")){
         var hadSessions = LOG.length > 0;
         if (hadSessions) exportData(); // a backup lands in Downloads before anything is destroyed
+        // belt and braces: downloads can fail silently (notably iOS standalone),
+        // so stash the erased data in storage as a recovery copy too
+        if (hadSessions){ try { localStorage.setItem(KEY + "-erased", JSON.stringify(LOG)); } catch(e){} }
         LOG = [];
         Store.save(LOG);
         try { localStorage.removeItem(PKEY); } catch(e){}
