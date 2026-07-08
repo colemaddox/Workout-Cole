@@ -84,14 +84,37 @@
   input::placeholder, textarea::placeholder{color:#615a44;}
   select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C9A24B' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px;}
 
-  /* Session type selector */
-  .types{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 0 24px;}
-  .types button{appearance:none;cursor:pointer;text-align:left;background:var(--ink-2);border:1px solid var(--line-soft);border-radius:12px;padding:13px 12px;color:var(--paper-dim);transition:all .18s ease;}
-  .types button .t-tag{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--paper);display:block;line-height:1;}
-  .types button .t-sub{font-size:10.5px;color:var(--muted);display:block;margin-top:6px;line-height:1.25;letter-spacing:0.01em;}
-  .types button.active{border-color:var(--brass);background:var(--surface-2);box-shadow:0 0 0 1px var(--brass) inset;}
-  .types button.active .t-tag{color:var(--brass-bright);}
-  .types button.active .t-sub{color:var(--paper-dim);}
+  /* Block picker */
+  .blocks-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .blk{appearance:none;cursor:pointer;text-align:left;background:var(--ink-2);border:1px solid var(--line-soft);border-radius:12px;padding:12px 12px 11px;color:var(--paper-dim);transition:all .18s ease;font-family:var(--sans);}
+  .blk .b-no{font-family:var(--mono);font-size:9.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);display:block;}
+  .blk .b-name{font-weight:700;font-size:14.5px;color:var(--paper);display:block;margin-top:4px;line-height:1.25;}
+  .blk .b-meta{font-family:var(--mono);font-size:10.5px;color:var(--muted);display:block;margin-top:6px;letter-spacing:0.02em;}
+  .blk .b-meta .k-s{color:var(--brass);}
+  .blk .b-meta .k-c{color:var(--sage);}
+  .blk.on{border-color:var(--brass);background:var(--surface-2);box-shadow:0 0 0 1px var(--brass) inset;}
+  .blk.on .b-name{color:var(--brass-bright);}
+  .blk.off{opacity:0.38;}
+  .blk.wide{grid-column:1 / -1;}
+  .blk .b-meta .k-st{color:var(--paper-dim);}
+  .stack-bar{margin-top:10px;background:var(--ink-2);border:1px solid var(--line-soft);border-radius:12px;padding:12px 14px;}
+  .stack-line{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:12px;color:var(--paper-dim);flex-wrap:wrap;}
+  .stack-total{font-weight:600;color:var(--brass-bright);white-space:nowrap;}
+  .stack-total.lo{color:var(--muted);}
+  .stack-total.hi{color:var(--red);}
+  .stack-hint{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;letter-spacing:0.02em;line-height:1.5;}
+  .stack-hint.warn{color:var(--brass-bright);}
+  .stack-actions{display:flex;gap:8px;margin-top:10px;}
+  .day-btn{appearance:none;border:none;background:var(--brass);color:#241a07;font-family:var(--sans);font-weight:700;font-size:14px;padding:13px 16px;border-radius:11px;cursor:pointer;flex:1;transition:transform .12s;}
+  .day-btn:active{transform:scale(0.985);}
+  .day-btn:disabled{background:var(--line);color:var(--muted);cursor:default;}
+  .day-btn.ghost{background:transparent;border:1px solid var(--line);color:var(--paper-dim);flex:0 0 auto;}
+  .blk-label{font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--brass);margin:16px 0 8px;}
+  .blk-label:first-child{margin-top:0;}
+  .day-strip{display:flex;align-items:center;gap:10px;background:var(--ink-2);border:1px solid var(--line-soft);border-radius:12px;padding:10px 14px;margin:0 0 18px;font-family:var(--mono);font-size:12px;color:var(--paper-dim);flex-wrap:wrap;}
+  .day-strip b{color:var(--brass-bright);font-weight:600;}
+  .day-strip .chg{margin-left:auto;appearance:none;background:transparent;border:1px solid var(--line);border-radius:8px;color:var(--muted);font-family:var(--sans);font-weight:600;font-size:12px;padding:6px 12px;cursor:pointer;}
+  .day-strip .chg.armed{color:#241a07;background:var(--brass);border-color:var(--brass);}
 
   /* Exercise card */
   .ex-card{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:15px 15px 13px;margin:0 0 12px;}
@@ -292,15 +315,52 @@
   .cyc-cap{font-family:var(--mono);font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);text-align:center;}
   .cyc-h{font-family:var(--serif);font-weight:600;font-size:19px;color:var(--brass-bright);margin-bottom:6px;}
   .cyc-b{font-size:13px;color:var(--paper-dim);margin-bottom:13px;line-height:1.5;}
+
+  /* Week ledger bar — the strength mandate at a glance */
+  .week-bar{background:var(--ink-2);border:1px solid var(--line-soft);border-radius:12px;padding:12px 14px;margin:0 0 18px;}
+  .wb-row{display:flex;align-items:center;gap:7px;}
+  .wb-lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-right:2px;}
+  .wb-core-lbl{margin-left:12px;}
+  .wb-pip{width:13px;height:13px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;}
+  .wb-pip.bonus{border-style:dashed;}
+  .wb-pip.on{background:var(--brass);border-color:var(--brass);border-style:solid;}
+  .wb-pip.core.on{background:var(--sage);border-color:var(--sage);}
+  .wb-left{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:0.04em;white-space:nowrap;}
+  .wb-hint{font-family:var(--mono);font-size:11px;color:var(--paper-dim);margin-top:8px;letter-spacing:0.02em;line-height:1.5;}
+  .stat .sub{font-family:var(--mono);font-size:10px;color:var(--paper-dim);margin-top:5px;letter-spacing:0.04em;}
+  .cyc-mand{display:block;font-size:9.5px;color:var(--muted);letter-spacing:0.04em;}
+  .cyc-mand.met{color:#bcd09c;}
+  .cyc-mand.miss{color:var(--red);}
+
+  /* Low-fuel flag */
+  .fuel-row{margin-top:8px;}
+  .fuel-row.on{border-color:var(--brass-deep);}
+  .fuel-row.on .cbox{background:var(--brass);border-color:var(--brass);border-radius:50%;}
+  .fuel-row.on .cbox::after{content:"\25D0";font-size:12px;}
+  .ex-badge.suggest.held{background:var(--ink-2);border-color:var(--line);color:var(--paper-dim);cursor:default;}
+  .h-fuel{font-size:12.5px;color:var(--paper-dim);font-weight:600;margin-top:8px;}
+
+  /* Suggested stack card */
+  .sugg{background:linear-gradient(135deg, var(--surface-2), var(--ink-2));border:1px solid var(--brass-deep);border-radius:14px;padding:14px 14px 12px;margin:0 0 12px;}
+  .sugg-eyebrow{font-family:var(--mono);font-size:9.5px;letter-spacing:0.22em;text-transform:uppercase;color:var(--brass);margin:0 0 9px;}
+  .sugg-row{appearance:none;width:100%;text-align:left;cursor:pointer;background:var(--ink-2);border:1px solid var(--line-soft);border-radius:11px;padding:11px 13px;margin:0 0 8px;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;font-family:var(--sans);transition:border-color .15s;}
+  .sugg-row:hover{border-color:var(--brass-deep);}
+  .sugg-main{display:flex;flex-direction:column;flex:1;min-width:0;}
+  .sugg-ids{font-family:var(--mono);font-weight:600;font-size:15px;color:var(--brass-bright);letter-spacing:0.06em;}
+  .sugg-names{font-size:12px;color:var(--paper);font-weight:600;margin-top:2px;line-height:1.35;}
+  .sugg-min{font-family:var(--mono);font-size:12px;color:var(--paper-dim);white-space:nowrap;}
+  .sugg-why{flex-basis:100%;font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:5px;letter-spacing:0.02em;line-height:1.5;}
+  .sugg-deload{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--brass-bright);line-height:1.5;margin-top:2px;}
+  .sugg-deload .pc-btn{flex-shrink:0;}
 </style>
 </head>
 <body>
 <div class="grain"></div>
 <div class="wrap">
   <header class="mast">
-    <div class="vol">Vol. I</div>
+    <div class="vol">Vol. II</div>
     <h1>Training Log</h1>
-    <div class="tag" id="cycle-tag">Cycle 01 &middot; Four-Week Foundation</div>
+    <div class="tag" id="cycle-tag">Cycle 02 &middot; Seven-Block Menu</div>
   </header>
   <div class="rule"></div>
 
@@ -322,12 +382,10 @@
 
     <div id="prog-prompt"></div>
 
-    <div class="flabel">Today's Session</div>
-    <div class="types">
-      <button data-type="A"><span class="t-tag">A</span><span class="t-sub">Strength + Cardio</span></button>
-      <button data-type="B"><span class="t-tag">B</span><span class="t-sub">Cardio + Core</span></button>
-      <button data-type="Free"><span class="t-tag">Free</span><span class="t-sub">Your own call</span></button>
-    </div>
+    <div id="week-bar" class="week-bar" style="display:none;"></div>
+
+    <div class="flabel" id="picker-label">Build Today's Session</div>
+    <div id="block-picker"></div>
 
     <div id="form-area"></div>
   </section>
@@ -373,6 +431,18 @@
   var DRAFT_KEY = KEY + "-draft";
   var memFallback = [];
 
+  // Block 1 is the Cycle 01 Session-A lineup, unchanged — one shared array so the
+  // legacy "A" edit path and Block 1 can never drift apart, and old history stays
+  // continuous (exercise names are the progression/chart keys).
+  var B1_STRENGTH = [
+    { name:"Leg Press",    sets:3, reps:"10-12", top:12, inc:10, kneeGate:true, cue:"Feet mid-platform, knees tracking over toes. Don't lock the knees hard at the top." },
+    { name:"Chest Press",  sets:3, reps:"10-12", top:12, inc:5, cue:"Shoulders down and back. Lower slowly; don't snap the elbows locked." },
+    { name:"Seated Row",   sets:3, reps:"10-12", top:12, inc:5, cue:"Lead with the elbows, squeeze the shoulder blades. No rocking with the lower back." },
+    { name:"Lat Pulldown", sets:3, reps:"10-12", top:12, inc:5, cue:"Pull to the upper chest, not behind the neck. Control the bar back up." },
+    { name:"Leg Curl",     sets:2, reps:"10-12", top:12, inc:5, cue:"Hips down, slow on the way back. No swinging." },
+    { name:"Calf Raise",   sets:2, reps:"12-15", top:15, inc:5, cue:"Full range, pause at the top, stretch at the bottom." }
+  ];
+
   var PROGRAM = {
     warmup: [
       { name:"Easy cardio or bike to warm up", d:"5 minutes" },
@@ -388,25 +458,61 @@
       { name:"Chest / doorway stretch", d:"20-30 sec" },
       { name:"Shoulder cross-body stretch", d:"20-30 sec each" }
     ],
-    A: {
-      strength: [
-        { name:"Leg Press",    sets:3, reps:"10-12", top:12, inc:10, kneeGate:true, cue:"Feet mid-platform, knees tracking over toes. Don't lock the knees hard at the top." },
-        { name:"Chest Press",  sets:3, reps:"10-12", top:12, inc:5, cue:"Shoulders down and back. Lower slowly; don't snap the elbows locked." },
-        { name:"Seated Row",   sets:3, reps:"10-12", top:12, inc:5, cue:"Lead with the elbows, squeeze the shoulder blades. No rocking with the lower back." },
-        { name:"Lat Pulldown", sets:3, reps:"10-12", top:12, inc:5, cue:"Pull to the upper chest, not behind the neck. Control the bar back up." },
-        { name:"Leg Curl",     sets:2, reps:"10-12", top:12, inc:5, cue:"Hips down, slow on the way back. No swinging." },
-        { name:"Calf Raise",   sets:2, reps:"12-15", top:15, inc:5, cue:"Full range, pause at the top, stretch at the bottom." }
-      ],
-      cardio:1,
-      core:["Plank","Dead Bug"]
+    // ----- Cycle 02: the Six-Block Menu. Stack blocks to fill 60–90 min. -----
+    blocks: {
+      "1": { name:"Machine Strength", kind:"Strength", est:32, min:"30-35",
+        conflicts:["2","3"], strength:B1_STRENGTH },
+      "2": { name:"Upper Push & Pull", kind:"Strength", est:27, min:"25-30",
+        conflicts:["1"], strength:[
+          { name:"Incline Dumbbell Press", sets:3, reps:"10-12", top:12, inc:5, cue:"Bench at 30-45°. Press to just short of lockout — no shoulder pinch. This is the press; nothing goes strictly overhead." },
+          { name:"Lateral Raise", sets:3, reps:"12-15", top:15, inc:2.5, cue:"Soft elbows, raise to shoulder height only, no swing. Replaces overhead pressing for the delts." },
+          { name:"Cable Row", sets:3, reps:"10-12", top:12, inc:5, cue:"Or a chest-supported dumbbell row. Squeeze the shoulder blades; torso still." },
+          { name:"Cable Triceps Pressdown", sets:2, reps:"10-12", top:12, inc:2.5, cue:"Elbows pinned. Cables on purpose — the triceps machines jump 20 lb at a time." },
+          { name:"Dumbbell Curl", sets:2, reps:"10-12", top:12, inc:5, cue:"No body English." }
+        ] },
+      "3": { name:"Lower & Posterior Chain", kind:"Strength", est:25, min:"~25",
+        conflicts:["1"], strength:[
+          { name:"Dumbbell Romanian Deadlift", sets:3, reps:"10-12", top:12, inc:5, cue:"Hinge at the hips, soft knees, flat back. Feel the hamstrings; stop before the back rounds." },
+          { name:"Glute Bridge / Hip Thrust", sets:3, reps:"10-12", top:12, inc:10, cue:"Shoulders on a bench or the floor. Squeeze at the top; don't hyperextend." },
+          B1_STRENGTH[4],  // Leg Curl — same movement as Block 1's; shares its history
+          { name:"Hip Abduction Machine", sets:2, reps:"12-15", top:15, inc:5, cue:"Controlled out and back." },
+          B1_STRENGTH[5]   // Calf Raise — same movement as Block 1's; shares its history
+        ] },
+      "4": { name:"Steady Cardio + Core", kind:"Cardio", est:32, min:"30-35",
+        cardio:1, core:["Glute Bridges","Bird-Dogs","Dead Bugs","Plank"],
+        note:"20-30 min at a conversational pace — treadmill incline walk, elliptical, or the walking track. The recumbent bike is off the menu; it's been rough on the right knee. Then 2-3 easy rounds of core, slow and controlled." },
+      "5": { name:"Cardio Intervals", kind:"Cardio", est:22, min:"20-25",
+        cardio:1,
+        note:"Elliptical or incline treadmill — no bike. 4 min easy, then 6-8 rounds of 1 min brisk (RPE 6-7) / 2 min easy, then 3 min easy. Raise incline before speed; never a sprint. Add a round each week until 8, then nudge the brisk effort. Log the rounds in the Incline / Level field (e.g. \"7 rounds\")." },
+      "6": { name:"Conditioning Circuit", kind:"Hybrid", est:25, min:"~25",
+        note:"Run it as a circuit: 3 rounds, minimal rest between exercises, 60-90s between rounds, everything at RPE 5-7. Progress by adding reps/seconds first, then a fourth round, then weight. Quality over speed.",
+        strength:[
+          { name:"Farmer Carry", sets:3, reps:"40 yds", top:40, inc:5, unit:"yds", cue:"Heavy-ish dumbbells, tall posture, braced core. 40 yards each round." },
+          { name:"Goblet Squat to Box", sets:3, reps:"8-10", top:10, inc:5, kneeGate:true, cue:"Pain-free depth only — skip it or swap in the kettlebell deadlift if the knee objects." },
+          { name:"Incline Push-Up", sets:3, reps:"8-12", top:12, prog:"Target hit last time — lower the incline a notch.", cue:"Hands on a bar or bench, body in one line. Lower the incline over time." },
+          { name:"Kettlebell Deadlift", sets:3, reps:"10", top:10, inc:5, cue:"Same hinge cues as the RDL: hips back, flat back, stand tall." },
+          { name:"Plank", sets:3, reps:"30-45 sec", top:45, unit:"sec", prog:"Target hit last time — add ~5 seconds.", cue:"30-45 seconds each round. Braced, straight line, easy breathing." }
+        ] },
+      "7": { name:"Core & Stability", kind:"Stability", est:13, min:"12-15", wide:true,
+        note:"Stacks onto any day — 2-3 rounds, slow and controlled. Anti-rotation and carries that protect the low back and spare the knees. Chips: Dead Bug 8-10/side, Bird-Dog 8/side with a 2s pause, Side Plank 20-30s/side (start from the knees). When Block 7 is in the stack, skip Block 4's core circuit — one dose of core a day is plenty.",
+        strength:[
+          { name:"Pallof Press", sets:3, reps:"10 / side", top:10, inc:2.5, cue:"Cable or band. Press straight out and resist the twist; ribs down, hips square." },
+          { name:"Suitcase Carry", sets:3, reps:"30-40 yds / side", top:40, inc:5, unit:"yds", cue:"One heavy dumbbell, tall posture, no lean — the fight is staying straight." }
+        ],
+        core:["Dead Bug","Bird-Dog","Side Plank"] }
     },
-    B: {
-      strength:[],
-      cardio:1,
-      core:["Glute Bridges","Bird-Dogs","Dead Bugs","Plank"]
-    },
+    // ----- Legacy session types (Cycle 01). Kept so old sessions render and edit
+    // exactly as logged; A shares Block 1's array. Free remains the wildcard. -----
+    A: { strength: B1_STRENGTH, cardio:1, core:["Plank","Dead Bug"] },
+    B: { strength:[], cardio:1, core:["Glute Bridges","Bird-Dogs","Dead Bugs","Plank"] },
     Free: { strength:[], cardio:1, core:[] }
   };
+  var BLOCK_ORDER = ["1","2","3","4","5","6","7"];
+  var STRENGTH_BLOCKS = { "1":1, "2":1, "3":1, "6":1 };
+  var BOOKENDS_MIN = 10; // warm-up ~5 + cool-down ~5, always on
+  // the program's weekly mandate (program constants, not user preferences):
+  // lift at least twice (three is better), two doses of core/stability a week
+  var WK_LIFT_MIN = 2, WK_LIFT_GOOD = 3, WK_CORE_MIN = 2;
 
   // ----- Small helpers -----
   function esc(v){
@@ -430,7 +536,7 @@
     if (!s || typeof s !== "object") return null;
     if (typeof s.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(s.date)) return null;
     var out = {
-      type: (s.type === "A" || s.type === "B" || s.type === "Free") ? s.type : "Free",
+      type: (s.type === "A" || s.type === "B" || s.type === "Free" || s.type === "Day") ? s.type : "Free",
       date: s.date,
       _t: (typeof s._t === "number" && isFinite(s._t) && s._t > 0) ? s._t : null,
       warmup: Array.isArray(s.warmup) ? s.warmup.map(String) : [],
@@ -440,6 +546,7 @@
       cooldown: Array.isArray(s.cooldown) ? s.cooldown.map(String) : [],
       rpe: typeof s.rpe === "string" ? s.rpe : "",
       knee: !!s.knee,
+      fuel: !!s.fuel,
       notes: typeof s.notes === "string" ? s.notes : ""
     };
     if (typeof s._edited === "number") out._edited = s._edited;
@@ -468,6 +575,18 @@
           dist: c.dist ? String(c.dist) : ""
         });
       });
+    }
+    if (out.type === "Day"){
+      // which of the six blocks this day stacked; ids validated against the program
+      var bl = [];
+      if (Array.isArray(s.blocks)){
+        s.blocks.forEach(function(b){
+          b = String(b);
+          if (PROGRAM.blocks[b] && bl.indexOf(b) === -1) bl.push(b);
+        });
+      }
+      bl.sort();
+      out.blocks = bl;
     }
     return out;
   }
@@ -509,6 +628,8 @@
   var LOG = [];
   var currentType = null;
   var editing = null;
+  var selBlocks = [];    // block ids picked in the block picker (pre-form)
+  var activeBlocks = []; // block ids of the form currently on screen (Day sessions)
 
   var $ = function(id){ return document.getElementById(id); };
 
@@ -548,25 +669,186 @@
     return x;
   }
 
-  function lastSession(type, excludeT, beforeDate){
-    var matches = LOG.filter(function(s){
-      return s.type === type && (excludeT == null || s._t !== excludeT) &&
-        (beforeDate == null || s.date < beforeDate);
-    });
-    if (!matches.length) return null;
-    matches.sort(function(a,b){
-      if (a.date === b.date) return (b._t||0) - (a._t||0);
-      return a.date < b.date ? 1 : -1;
-    });
-    return matches[0];
-  }
-
   function lastExercise(session, name){
     if (!session || !session.strength) return null;
     for (var i=0;i<session.strength.length;i++){
       if (session.strength[i].name === name) return session.strength[i];
     }
     return null;
+  }
+
+  // most recent session that actually CONTAINS this exercise, regardless of
+  // session type — this is what bridges Cycle 01 "A" history into the blocks,
+  // and lets Blocks 1 and 3 share Leg Curl / Calf Raise progression
+  function lastLogged(name, excludeT, beforeDate, skipFuel){
+    var best = null;
+    for (var i=0;i<LOG.length;i++){
+      var s = LOG[i];
+      if (excludeT != null && s._t === excludeT) continue;
+      if (beforeDate != null && !(s.date < beforeDate)) continue;
+      if (skipFuel && s.fuel) continue;
+      if (!lastExercise(s, name)) continue;
+      if (!best || s.date > best.date || (s.date === best.date && (s._t||0) > (best._t||0))) best = s;
+    }
+    return best;
+  }
+
+  // ----- Day/block helpers -----
+  function isStrengthDay(s){
+    if (s.type === "A") return true;
+    if (s.type === "Day") return (s.blocks || []).some(function(b){ return STRENGTH_BLOCKS[b]; });
+    return false;
+  }
+  function cellType(s){ // token for the cycle-grid cell color
+    if (s.type === "Free") return "F";
+    return isStrengthDay(s) ? "A" : "B";
+  }
+  function badgeText(s){
+    if (s.type !== "Day") return s.type;
+    var b = s.blocks || [];
+    return (b.length && b.length <= 2) ? b.join("·") : "Day";
+  }
+  function blocksLabel(s){
+    if (s.type === "Day" && s.blocks && s.blocks.length) return "Blocks " + s.blocks.join(" + ");
+    return "Session " + s.type;
+  }
+  function estOf(blockIds){
+    var t = BOOKENDS_MIN;
+    (blockIds || []).forEach(function(b){ if (PROGRAM.blocks[b]) t += PROGRAM.blocks[b].est; });
+    return t;
+  }
+  function unitForName(name){ // reps-column unit for reps-only chart series (yds/sec)
+    for (var i=0;i<BLOCK_ORDER.length;i++){
+      var st = PROGRAM.blocks[BLOCK_ORDER[i]].strength || [];
+      for (var j=0;j<st.length;j++){
+        if (st[j].name === name && st[j].unit) return st[j].unit;
+      }
+    }
+    return null;
+  }
+
+  // ----- Weekly mandate tallies (derived at render time; nothing is stored) -----
+  // a calendar DAY banks a lift when any session that day is strength-led, or a
+  // Free/legacy-B session honestly lifted (2+ exercises); a day banks a core dose
+  // via Block 7 or 2+ core chips (bridges legacy core work and Block 4's circuit)
+  function countsAsLift(s){
+    if (isStrengthDay(s)) return true;
+    return (s.type === "Free" || s.type === "B") && s.strength.length >= 2;
+  }
+  function countsAsCore(s){
+    if (s.type === "Day" && (s.blocks || []).indexOf("7") !== -1) return true;
+    return (s.core || []).length >= 2;
+  }
+  function weekTally(startIso){ // distinct-date counting: a two-a-day banks once
+    var end = parseISO(startIso);
+    end.setDate(end.getDate() + 7);
+    var endIso = isoOf(end);
+    var lifted = {}, cored = {}, trained = {};
+    var out = { sessions: 0, liftDays: 0, coreDays: 0 };
+    LOG.forEach(function(s){
+      if (!(s.date >= startIso && s.date < endIso)) return;
+      if (!trained[s.date]){ trained[s.date] = 1; out.sessions++; }
+      if (countsAsLift(s) && !lifted[s.date]){ lifted[s.date] = 1; out.liftDays++; }
+      if (countsAsCore(s) && !cored[s.date]){ cored[s.date] = 1; out.coreDays++; }
+    });
+    return out;
+  }
+
+  // ----- Stack suggestions (advisory only — a tap just pre-selects the picker) -----
+  function rpeNum(s){
+    var n = parseInt(s.rpe, 10); // "7 - Hard" -> 7; custom/blank -> null
+    return isNaN(n) ? null : n;
+  }
+  function stackValid(ids){ // hard guarantee: never suggest a conflicting stack
+    for (var i=0;i<ids.length;i++){
+      var c = (PROGRAM.blocks[ids[i]] && PROGRAM.blocks[ids[i]].conflicts) || [];
+      for (var j=0;j<c.length;j++){ if (ids.indexOf(c[j]) !== -1) return false; }
+    }
+    return true;
+  }
+  function lastBlockDate(bid, beforeIso){ // legacy A counts as Block 1 — same lineup
+    var best = null;
+    for (var i=0;i<LOG.length;i++){
+      var s = LOG[i];
+      if (beforeIso && s.date > beforeIso) continue; // backdating plans THAT day
+      var has = (s.type === "Day" && (s.blocks || []).indexOf(bid) !== -1) ||
+                (bid === "1" && s.type === "A");
+      if (has && (!best || s.date > best)) best = s.date;
+    }
+    return best;
+  }
+  function suggestStacks(refISO){
+    if (loadDraft()) return []; // the draft-resume card owns the morning
+    for (var i=0;i<LOG.length;i++){ if (LOG[i].date === refISO) return []; }
+    var wkStart = isoOf(startOfWeek(parseISO(refISO)));
+    var t = weekTally(wkStart);
+    var y = parseISO(refISO); y.setDate(y.getDate() - 1);
+    var yIso = isoOf(y);
+    var hardLower = false, latest = null;
+    LOG.forEach(function(s){
+      // everything is relative to the day being planned — a backdated entry
+      // must not reason from sessions that happened after it
+      if (s.date > refISO) return;
+      if (s.date === yIso){
+        var lower = s.type === "A" ||
+          (s.type === "Day" && ((s.blocks || []).indexOf("1") !== -1 || (s.blocks || []).indexOf("3") !== -1));
+        var r = rpeNum(s);
+        if (lower && r != null && r >= 7) hardLower = true;
+      }
+      if (!latest || s.date > latest.date || (s.date === latest.date && (s._t||0) > (latest._t||0))) latest = s;
+    });
+    var kneeRecent = !!(latest && latest.knee);
+
+    // least-recently-trained strength block; no lower the day after a hard
+    // lower day; lead with upper when the knee was flagged last session
+    var cand = ["1","2","3","6"].filter(function(b){
+      return !(hardLower && (b === "1" || b === "3"));
+    });
+    cand.sort(function(a,b){
+      var da = lastBlockDate(a, refISO) || "", db = lastBlockDate(b, refISO) || "";
+      if (da !== db) return da < db ? -1 : 1;
+      return a < b ? -1 : 1;
+    });
+    if (kneeRecent && cand.indexOf("2") > 0){
+      cand.splice(cand.indexOf("2"), 1);
+      cand.unshift("2");
+    }
+    var sBlk = cand[0];
+
+    function weekBlockCount(bid){
+      var seen = {}, n = 0;
+      var we = parseISO(wkStart); we.setDate(we.getDate() + 7);
+      var wkEnd = isoOf(we);
+      LOG.forEach(function(s){
+        if (s.type !== "Day" || !(s.date >= wkStart && s.date < wkEnd)) return;
+        if ((s.blocks || []).indexOf(bid) !== -1 && !seen[s.date]){ seen[s.date] = 1; n++; }
+      });
+      return n;
+    }
+    var cBlk = weekBlockCount("5") < weekBlockCount("4") ? "5" : "4";
+
+    var out = [];
+    var one, why;
+    if (t.liftDays >= WK_LIFT_GOOD){
+      one = ["4"];
+      why = t.liftDays + " lifts banked — recovery day: steady cardio";
+    } else {
+      one = [sBlk, cBlk];
+      why = t.liftDays + " of " + WK_LIFT_MIN + " lifts down · core " + t.coreDays + " of " + WK_CORE_MIN;
+      if (hardLower) why += " · no heavy lower — yesterday was a hard lower day";
+      else if (kneeRecent) why += " · upper first — knee was flagged last time";
+    }
+    if (t.coreDays < WK_CORE_MIN && one.indexOf("7") === -1 && estOf(one.concat(["7"])) <= 90) one.push("7");
+    one.sort();
+    if (stackValid(one)) out.push({ ids: one, est: estOf(one), why: why });
+
+    var two = [sBlk, "7"];
+    two.sort();
+    if (stackValid(two) && (!out.length || out[0].ids.join() !== two.join())){
+      out.push({ ids: two, est: estOf(two),
+        why: "short on fuel? strength + core only — skip cardio, cap at RPE 6" });
+    }
+    return out;
   }
 
   // ----- Cycle ledger state -----
@@ -615,7 +897,7 @@
     for (var i=0;i<4;i++){
       var days = [];
       for (var j=0;j<7;j++) days.push({ count:0, types:[] });
-      weeks.push({ days: days, total: 0 });
+      weeks.push({ days: days, total: 0, strDays: 0, coreDays: 0, _ld: {}, _cd: {} });
     }
     var total = 0;
     LOG.forEach(function(s){
@@ -623,21 +905,26 @@
       if (w < 0 || w > 3) return;
       var di = (parseISO(s.date).getDay() + 6) % 7;
       weeks[w].days[di].count++;
-      weeks[w].days[di].types.push(s.type);
+      weeks[w].days[di].types.push(cellType(s)); // A=strength-led, B=cardio-led, F=free
       weeks[w].total++;
       total++;
+      // mandate tallies count distinct DATES, not sessions
+      if (countsAsLift(s) && !weeks[w]._ld[s.date]){ weeks[w]._ld[s.date] = 1; weeks[w].strDays++; }
+      if (countsAsCore(s) && !weeks[w]._cd[s.date]){ weeks[w]._cd[s.date] = 1; weeks[w].coreDays++; }
     });
     return { weeks: weeks, total: total };
   }
   function updateCycleTag(){
     var t = $("cycle-tag");
-    if (t && CYCLE) t.innerHTML = "Cycle " + String(CYCLE.num).padStart(2,"0") + " &middot; Four-Week Foundation";
+    if (t && CYCLE) t.innerHTML = "Cycle " + String(CYCLE.num).padStart(2,"0") + " &middot; Seven-Block Menu";
   }
 
   // ----- Builders -----
-  function setRow(idx, last, val){
+  function setRow(idx, last, val, unit){
     var row = document.createElement("div");
     row.className = "set-row";
+    var u = unit || "reps";
+    var uLabel = u === "sec" ? "Seconds" : (u === "yds" ? "Yards" : "Reps");
     var wPlace = (last && last.weight!=null) ? esc(last.weight) : "";
     var rPlace = (last && last.reps!=null) ? esc(last.reps) : "";
     var wVal = (val && val.weight!=null) ? esc(val.weight) : "";
@@ -645,7 +932,7 @@
     row.innerHTML =
       '<button type="button" class="snum stamp" aria-pressed="false" aria-label="Mark set '+idx+' done and start rest">'+idx+'</button>' +
       '<div class="unit-wrap"><input type="number" class="w" inputmode="decimal" min="0" placeholder="'+wPlace+'" value="'+wVal+'" aria-label="Weight, set '+idx+'"><span class="unit">lbs</span></div>' +
-      '<div class="unit-wrap"><input type="number" class="r" inputmode="numeric" min="0" placeholder="'+rPlace+'" value="'+rVal+'" aria-label="Reps, set '+idx+'"><span class="unit">reps</span></div>' +
+      '<div class="unit-wrap"><input type="number" class="r" inputmode="numeric" min="0" placeholder="'+rPlace+'" value="'+rVal+'" aria-label="'+uLabel+', set '+idx+'"><span class="unit">'+esc(u)+'</span></div>' +
       '<button type="button" class="x-btn rm" aria-label="Remove set">&times;</button>';
     row.querySelector(".rm").addEventListener("click", function(){
       var wrap = row.parentNode;
@@ -724,6 +1011,26 @@
     return { from: w, to: w + ex.inc, inc: ex.inc };
   }
 
+  // the single progression brain (form cards AND the home card): progression
+  // reads THROUGH low-fuel days, so a program-compliant light session can't
+  // erase an earned bump. lastFor = most recent session with the exercise;
+  // qual = the one progression judges against (skips low-fuel days).
+  function progressionFor(ex, excludeT, beforeDate){
+    var lastFor = lastLogged(ex.name, excludeT, beforeDate);
+    var qual = (lastFor && lastFor.fuel) ? lastLogged(ex.name, excludeT, beforeDate, true) : lastFor;
+    var sg = suggestNext(ex, qual);
+    // a knee flag on the skipped low-fuel day still holds a knee-gated bump
+    if (sg && sg.to && ex.kneeGate && lastFor && lastFor.knee) sg = { hold: true, from: sg.from };
+    return { lastFor: lastFor, qual: qual, sg: sg };
+  }
+
+  // live suggestion chips register here so the low-fuel toggle can swap them
+  // to holds and back; rebuilt with every form
+  var fuelSugs = [];
+  function applyFuel(on){
+    for (var i=0;i<fuelSugs.length;i++) fuelSugs[i](on);
+  }
+
   function exerciseCard(opts){
     opts = opts || {};
     var card = document.createElement("div");
@@ -750,7 +1057,7 @@
         lastLine.innerHTML = 'Previous session: <b>' + summ + '</b>';
       } else {
         lastLine.className = "ex-last fillable";
-        lastLine.innerHTML = 'Last time: <b>' + summ + '</b><span class="fill-cue">&#8635; tap to use</span>';
+        lastLine.innerHTML = esc(opts.lastLabel || 'Last time') + ': <b>' + summ + '</b><span class="fill-cue">&#8635; tap to use</span>';
         lastLine.addEventListener("click", function(){
           Array.prototype.forEach.call(setsWrap.querySelectorAll(".set-row"), function(r, i){
             var src = opts.lastSets[i];
@@ -799,6 +1106,23 @@
         }
         sg.innerHTML = filled ? filledHTML : idleHTML;
       });
+      // the low-fuel toggle turns this chip into a hold notice (and back);
+      // un-tap first so a filled suggestion's values are restored, not kept
+      var holdHTML = '<span class="sg-l">&#9680; Low fuel &mdash; hold at '+opts.suggest.from+' lbs today</span>' +
+        '<span class="sg-sub">the earned bump waits for a fueled day</span>';
+      fuelSugs.push(function(on){
+        if (on){
+          if (sg.classList.contains("filled")) sg.click();
+          sg.disabled = true;
+          sg.classList.add("held");
+          sg.innerHTML = holdHTML;
+        } else {
+          sg.disabled = false;
+          sg.classList.remove("held");
+          sg.setAttribute("aria-pressed","false");
+          sg.innerHTML = idleHTML;
+        }
+      });
       card.appendChild(sg);
     } else if (opts.suggest && opts.suggest.hold){
       var hd = document.createElement("div");
@@ -808,7 +1132,7 @@
     } else if (opts.hit){
       var bdg = document.createElement("div");
       bdg.className = "ex-badge";
-      bdg.textContent = "You hit your target last time. Consider adding weight.";
+      bdg.textContent = opts.prog || "You hit your target last time. Consider adding weight.";
       card.appendChild(bdg);
     }
 
@@ -821,7 +1145,8 @@
 
     var headRow = document.createElement("div");
     headRow.className = "set-head";
-    headRow.innerHTML = '<span></span><span>Weight</span><span>Reps</span><span></span>';
+    var uHead = opts.unit === "sec" ? "Seconds" : (opts.unit === "yds" ? "Yards" : "Reps");
+    headRow.innerHTML = '<span></span><span>Weight</span><span>'+uHead+'</span><span></span>';
     card.appendChild(headRow);
 
     setsWrap = document.createElement("div");
@@ -834,7 +1159,7 @@
     for (var i=0;i<nSets;i++){
       var last = (opts.lastSets && opts.lastSets[i]) ? opts.lastSets[i] : null;
       var val = (opts.values && opts.values[i]) ? opts.values[i] : null;
-      setsWrap.appendChild(setRow(i+1, last, val));
+      setsWrap.appendChild(setRow(i+1, last, val, opts.unit));
     }
 
     var addBtn = document.createElement("button");
@@ -842,7 +1167,7 @@
     addBtn.className = "add-set";
     addBtn.textContent = "+ Add set";
     addBtn.addEventListener("click", function(){
-      setsWrap.appendChild(setRow(setsWrap.children.length + 1, null, null));
+      setsWrap.appendChild(setRow(setsWrap.children.length + 1, null, null, opts.unit));
     });
     card.appendChild(addBtn);
 
@@ -868,9 +1193,9 @@
         '<div class="cc-field full"><label>Activity</label>' +
           '<select class="c-act" aria-label="Cardio activity">' +
             '<option>Treadmill (incline walk)</option>' +
-            '<option>Stationary Bike</option>' +
-            '<option>Walking Track</option>' +
             '<option>Elliptical</option>' +
+            '<option>Walking Track</option>' +
+            '<option>Stationary Bike</option>' +
             '<option>Other</option>' +
           '</select></div>' +
         '<div class="cc-field"><label>Minutes</label><input type="number" class="c-min" inputmode="numeric" min="0" placeholder="20" aria-label="Cardio minutes"></div>' +
@@ -951,21 +1276,66 @@
   function buildForm(type, session, isEdit){
     currentType = type;
     editing = isEdit ? session : null;
+    // a resumed draft owns the slot from the start; fresh and edit forms don't
+    // own it until their own autosave writes it
+    draftOwned = !!session && !isEdit;
+    fuelSugs = []; // chip registry rebuilds with the form
     var area = $("form-area");
     area.innerHTML = "";
-    var conf = PROGRAM[type];
+    var isDay = (type === "Day");
+    var dayBlocks = isDay ? ((session && session.blocks) ? session.blocks.slice() : selBlocks.slice()) : [];
+    dayBlocks.sort();
+    activeBlocks = dayBlocks;
+    var conf = isDay ? null : PROGRAM[type];
     // when amending, "last time" means the session BEFORE this one, never a later one
-    var last = lastSession(type, editing ? editing._t : null, editing ? editing.date : null);
+    var exT = editing ? editing._t : null;
+    var exD = editing ? editing.date : null;
 
     if (editing){
       var bn = document.createElement("div");
       bn.className = "edit-banner";
+      var ebBlocks = (editing.type === "Day" && editing.blocks && editing.blocks.length)
+        ? ' &middot; Blocks ' + editing.blocks.join("+") : '';
       bn.innerHTML =
         '<div class="eb-text"><div class="eb-eyebrow">Amending the record</div>' +
-        '<div class="eb-date">Editing session from ' + fmtDate(editing.date) + '</div></div>' +
+        '<div class="eb-date">Editing session from ' + fmtDate(editing.date) + ebBlocks + '</div></div>' +
         '<button type="button" class="del" id="edit-cancel">Cancel</button>';
       area.appendChild(bn);
       bn.querySelector("#edit-cancel").addEventListener("click", cancelEdit);
+    }
+
+    if (!editing){
+      // every non-edit form gets a strip with a way back to the picker —
+      // without it a Free form (or resumed legacy draft) would have no exit
+      var strip = document.createElement("div");
+      strip.className = "day-strip";
+      var chgLabel = isDay ? "Change" : "Back";
+      var stripLabel = isDay
+        ? ('Today: <b>' + (dayBlocks.length ? 'Block ' + dayBlocks.join(' + Block ') : 'no blocks') + '</b>' +
+           '<span>&asymp; ' + estOf(dayBlocks) + ' min</span>')
+        : ('Today: <b>' + (type === "Free" ? "Free session" : "Session " + esc(type)) + '</b>');
+      strip.innerHTML = stripLabel + '<button type="button" class="chg">' + chgLabel + '</button>';
+      area.appendChild(strip);
+      var chgBtn = strip.querySelector(".chg");
+      chgBtn.addEventListener("click", function(){
+        if (formHasEntries() && !chgBtn.classList.contains("armed")){
+          chgBtn.classList.add("armed");
+          chgBtn.textContent = "Tap again — entries will be discarded";
+          setTimeout(function(){ chgBtn.classList.remove("armed"); chgBtn.textContent = chgLabel; }, 3000);
+          return;
+        }
+        // confirmed: tear the form down and return to the picker, selection kept.
+        // only clear the draft slot if THIS form wrote it — an untouched form
+        // must not destroy an older stored draft behind the resume card
+        stopRest();
+        if (draftOwned) clearDraft();
+        else { clearTimeout(draftTimer); draftTimer = null; }
+        currentType = null; editing = null; activeBlocks = [];
+        $("form-area").innerHTML = "";
+        $("savebar").style.display = "none";
+        renderPicker();
+        renderPrompt();
+      });
     }
 
     area.appendChild(sectionLabel("Warm-Up"));
@@ -979,14 +1349,14 @@
     wu.id = "warmup-wrap";
     area.appendChild(wu);
 
-    if (type === "A"){
+    if (type === "A" || isDay){
       var knee = document.createElement("button");
       knee.className = "check-row knee-row"; knee.type = "button"; knee.id = "knee-toggle";
       knee.innerHTML = '<span class="cbox"></span><span class="ctext"><span class="cname">Knee discomfort today?</span><span class="cdet">Tap if your knees are bothering you</span></span>';
       area.appendChild(knee);
       var ka = document.createElement("div"); ka.className = "ex-alert"; ka.id = "knee-alert"; ka.style.display = "none";
       ka.setAttribute("role","status");
-      ka.innerHTML = '<b>Go easy on the knees.</b> Lighten the Leg Press and shorten the range, or skip it and add a set of Leg Curls. Keep every movement pain-free.';
+      ka.innerHTML = '<b>Go easy on the knees.</b> Lighten or skip the Leg Press and the Goblet Squat, shorten the range, and lean on hinges and leg curls instead. Keep every movement pain-free.';
       area.appendChild(ka);
       var kneeOn = !!(session && session.knee);
       if (kneeOn){ knee.classList.add("on"); ka.style.display = "block"; }
@@ -998,8 +1368,48 @@
       });
     }
 
+    // Low-fuel flag — on EVERY form (5 AM sessions can be Free days too, and a
+    // session can be retro-flagged in edit mode). GLP-1 rule: cap RPE 6, drop
+    // the cardio, keep strength light; the flag also shields progression.
+    var fuel = document.createElement("button");
+    fuel.className = "check-row fuel-row"; fuel.type = "button"; fuel.id = "fuel-toggle";
+    fuel.innerHTML = '<span class="cbox"></span><span class="ctext"><span class="cname">Low fuel today?</span><span class="cdet">Running on empty &mdash; capped effort, easy on cardio</span></span>';
+    area.appendChild(fuel);
+    var fal = document.createElement("div"); fal.className = "ex-alert"; fal.id = "fuel-alert"; fal.style.display = "none";
+    fal.setAttribute("role","status");
+    var fuelMsg = '<b>Running on fumes &mdash; cap it at RPE 6.</b> Same lifts, a notch lighter, crisp reps. Protein when you get home.';
+    var hasCardioBlk = isDay && dayBlocks.some(function(b){
+      var blk = PROGRAM.blocks[b];
+      return blk && blk.kind === "Cardio";
+    });
+    if (hasCardioBlk) fuelMsg += ' Cardio is in today\'s stack &mdash; skip it or cap it at an easy 10-minute walk.';
+    fal.innerHTML = fuelMsg;
+    area.appendChild(fal);
+    var fuelOn = !!(session && session.fuel);
+    if (fuelOn){ fuel.classList.add("on"); fal.style.display = "block"; }
+    fuel.setAttribute("aria-pressed", fuelOn ? "true" : "false");
+    fuel.addEventListener("click", function(){
+      var on = fuel.classList.toggle("on");
+      fuel.setAttribute("aria-pressed", on ? "true" : "false");
+      fal.style.display = on ? "block" : "none";
+      applyFuel(on);
+    });
+
     var savedStr = (session && session.strength) ? session.strength : [];
-    if (conf.strength.length || type === "Free" || savedStr.length){
+    // strength renders as groups: legacy types get one unlabeled group,
+    // a Day gets one labeled group per selected strength/hybrid block
+    var groups = [];
+    if (isDay){
+      dayBlocks.forEach(function(bid){
+        var blk = PROGRAM.blocks[bid];
+        if (blk && blk.strength && blk.strength.length){
+          groups.push({ label: "Block " + bid + " — " + blk.name, note: blk.note || null, exercises: blk.strength });
+        }
+      });
+    } else if (conf.strength.length){
+      groups.push({ label: null, note: null, exercises: conf.strength });
+    }
+    if (groups.length || type === "Free" || savedStr.length){
       area.appendChild(sectionLabel("Strength"));
       var strengthWrap = document.createElement("div");
       strengthWrap.id = "strength-wrap";
@@ -1011,23 +1421,50 @@
         }
         return null;
       }
-      conf.strength.forEach(function(ex){
-        var le = lastExercise(last, ex.name);
-        var saved = takeSaved(ex.name);
-        var sg = (!session) ? suggestNext(ex, last) : null;
-        strengthWrap.appendChild(exerciseCard({
-          name: ex.name, sets: ex.sets, reps: ex.reps, cue: ex.cue,
-          suggest: sg,
-          hit: !isEdit && !sg && hitTarget(ex.top, le ? le.sets : null, ex.sets),
-          lastSets: le ? le.sets : null,
-          values: saved ? saved.sets : null
-        }));
+      groups.forEach(function(g){
+        if (g.label){
+          var gl = document.createElement("div");
+          gl.className = "blk-label";
+          gl.textContent = g.label;
+          strengthWrap.appendChild(gl);
+        }
+        if (g.note){
+          var gn = document.createElement("div");
+          gn.className = "ex-cue";
+          gn.textContent = g.note;
+          strengthWrap.appendChild(gn);
+        }
+        g.exercises.forEach(function(ex){
+          // "last time" = the most recent session CONTAINING this exercise,
+          // whatever its type — Cycle 01 history flows straight into the blocks.
+          // Fresh forms display the last SOLID session (progression reads
+          // through low-fuel days); edits keep showing the true previous one.
+          var pf = progressionFor(ex, exT, exD);
+          var display = editing ? pf.lastFor : (pf.qual || pf.lastFor);
+          var le = lastExercise(display, ex.name);
+          var qe = lastExercise(pf.qual, ex.name);
+          var lastLabel = null;
+          if (!editing && pf.lastFor && pf.lastFor.fuel){
+            lastLabel = pf.qual ? "Last solid session" : "Last time (low fuel)";
+          }
+          var saved = takeSaved(ex.name);
+          var sg = (!session) ? pf.sg : null;
+          strengthWrap.appendChild(exerciseCard({
+            name: ex.name, sets: ex.sets, reps: ex.reps, cue: ex.cue, unit: ex.unit, prog: ex.prog,
+            suggest: sg,
+            hit: !isEdit && !sg && hitTarget(ex.top, qe ? qe.sets : null, ex.sets),
+            lastSets: le ? le.sets : null,
+            lastLabel: lastLabel,
+            values: saved ? saved.sets : null
+          }));
+        });
       });
       // everything saved on this session that the program cards didn't consume
       savedStr.forEach(function(ex, i){
         if (!consumed[i]){
           strengthWrap.appendChild(exerciseCard({
-            name: ex.name, sets: ex.sets.length, values: ex.sets
+            name: ex.name, sets: ex.sets.length, values: ex.sets,
+            unit: unitForName(ex.name) // yds/sec entries keep their column labels
           }));
         }
       });
@@ -1044,12 +1481,28 @@
     }
 
     area.appendChild(sectionLabel("Cardio"));
+    var cardioBlockCount = 0;
+    if (isDay){
+      dayBlocks.forEach(function(bid){
+        var blk = PROGRAM.blocks[bid];
+        if (blk && blk.cardio){
+          cardioBlockCount++;
+          if (blk.note){
+            var cn = document.createElement("div");
+            cn.className = "ex-cue";
+            cn.textContent = "Block " + bid + " — " + blk.name + ": " + blk.note;
+            area.appendChild(cn);
+          }
+        }
+      });
+    }
     var cardioWrap = document.createElement("div");
     cardioWrap.id = "cardio-wrap";
     if (session && session.cardio && session.cardio.length){
       session.cardio.forEach(function(c){ cardioWrap.appendChild(cardioCard(c)); });
     } else {
-      cardioWrap.appendChild(cardioCard());
+      var nCards = Math.max(1, cardioBlockCount);
+      for (var ci = 0; ci < nCards; ci++) cardioWrap.appendChild(cardioCard());
     }
     area.appendChild(cardioWrap);
     var addC = document.createElement("button");
@@ -1060,7 +1513,19 @@
     area.appendChild(addC);
 
     area.appendChild(sectionLabel("Core & Mobility"));
-    var coreList = (conf.core && conf.core.length) ? conf.core.slice() : ["Plank","Dead Bug","Glute Bridges","Bird-Dogs"];
+    var coreBase = [];
+    if (isDay){
+      // one dose of core per day: Block 7's stability work replaces Block 4's circuit
+      var has7 = dayBlocks.indexOf("7") !== -1;
+      dayBlocks.forEach(function(bid){
+        if (has7 && bid === "4") return;
+        var blk = PROGRAM.blocks[bid];
+        ((blk && blk.core) || []).forEach(function(c){ if (coreBase.indexOf(c) === -1) coreBase.push(c); });
+      });
+    } else if (conf.core && conf.core.length){
+      coreBase = conf.core.slice();
+    }
+    var coreList = coreBase.length ? coreBase : ["Plank","Dead Bug","Glute Bridges","Bird-Dogs"];
     if (session && session.core){
       session.core.forEach(function(n){ if (coreList.indexOf(n) === -1) coreList.push(n); });
     }
@@ -1093,6 +1558,13 @@
         '<option>8 - Very hard</option>' +
       '</select>';
     area.appendChild(er);
+    // honesty nudge, never a blocker: RPE 7+ while the low-fuel flag is on
+    $("in-rpe").addEventListener("change", function(){
+      var ft = $("fuel-toggle");
+      if (!ft || !ft.classList.contains("on")) return;
+      var v = parseInt(this.value, 10);
+      if (!isNaN(v) && v >= 7) toast("Above the low-fuel cap — log it honestly, but RPE 6 is the ceiling on empty");
+    });
 
     area.appendChild(sectionLabel("Notes"));
     var nt = document.createElement("textarea");
@@ -1119,15 +1591,13 @@
     $("save-hint").textContent = editing ? "Changes replace the original entry." : "Draft saves as you type. Your numbers wait for you here.";
     $("savebar").style.display = "block";
     renderPrompt();
+    renderPicker();
   }
 
   function startEdit(s){
     stopRest();
     switchView("log");
-    clearTypeButtons();
-    var type = PROGRAM[s.type] ? s.type : "Free";
-    var btn = document.querySelector('.types button[data-type="'+type+'"]');
-    if (btn) btn.classList.add("active");
+    var type = s.type === "Day" ? "Day" : (PROGRAM[s.type] ? s.type : "Free");
     buildForm(type, s, true);
     window.scrollTo(0,0);
   }
@@ -1136,12 +1606,15 @@
     stopRest();
     editing = null;
     currentType = null;
+    activeBlocks = [];
     $("form-area").innerHTML = "";
-    clearTypeButtons();
+    // reset the date BEFORE rendering — the picker's suggestions read #in-date,
+    // and the edited session's date would suppress (or mis-week) them
+    $("in-date").value = todayISO();
+    renderPicker();
     $("savebar").style.display = "none";
     $("save-btn").textContent = "Save Session";
     $("save-hint").textContent = "Draft saves as you type. Your numbers wait for you here.";
-    $("in-date").value = todayISO();
     renderPrompt();
     toast("Edit cancelled");
   }
@@ -1223,6 +1696,12 @@
     var knee = kneeEl ? kneeEl.classList.contains("on")
       : ((editing ? !!editing.knee : false) || kneeMentioned(notes));
 
+    // Low-fuel flag: the toggle is on every form and is authoritative; if it
+    // were ever absent, an edited session keeps its stored flag. No notes-mining
+    // — "fasted"/"no breakfast" phrasing is too ambiguous to infer from.
+    var fuelEl = $("fuel-toggle");
+    var fuel = fuelEl ? fuelEl.classList.contains("on") : (editing ? !!editing.fuel : false);
+
     var s = {
       type: currentType,
       date: $("in-date").value,
@@ -1234,8 +1713,10 @@
       cooldown: cooldown,
       rpe: rpeEl ? rpeEl.value : "",
       knee: knee,
+      fuel: fuel,
       notes: notes
     };
+    if (currentType === "Day") s.blocks = activeBlocks.slice();
     if (editing) s._edited = Date.now();
     return s;
   }
@@ -1259,15 +1740,20 @@
     }
     var wasEdit = !!editing;
     if (editing){
+      // a change-nothing Update must not stamp a fresh _edited — it would win
+      // import conflict resolution over a REAL edit made on another device
+      if (contentKey(s) === contentKey(editing)){
+        if (editing._edited) s._edited = editing._edited; else delete s._edited;
+      }
       var i = LOG.indexOf(editing);
       if (i > -1) LOG[i] = s; else LOG.push(s);
     } else {
       LOG.push(s);
     }
     var ok = Store.save(LOG);
-    // a draft never belongs to an edit; and if the save failed, the draft is the
-    // only durable copy of this workout — keep it so Resume still works
-    if (!wasEdit && ok) clearDraft();
+    // clear the draft only when (a) this wasn't an edit, (b) the save actually
+    // persisted, and (c) the slot holds THIS form's draft — never a stranger's
+    if (!wasEdit && ok && draftOwned) clearDraft();
     stopRest();
 
     var msg;
@@ -1282,31 +1768,229 @@
         var label = (w === weekOf(todayISO())) ? "this week" : "that week";
         msg += " — " + buildCycleCounts().weeks[w].total + " of " + CYCLE.weeklyGoal + " " + label;
       }
+      // strength-mandate credit at the moment of the rep (current week only)
+      var sowS = isoOf(startOfWeek(parseISO(s.date)));
+      if (sowS === isoOf(startOfWeek(new Date()))){
+        var wt = weekTally(sowS);
+        msg += " · lift " + wt.liftDays + " of " + WK_LIFT_MIN + (wt.liftDays >= WK_LIFT_MIN ? " ✓" : "");
+      }
     }
     toast(msg);
 
     editing = null;
     currentType = null;
+    selBlocks = [];
+    activeBlocks = [];
     $("form-area").innerHTML = "";
     $("savebar").style.display = "none";
     $("save-btn").textContent = "Save Session";
     $("save-hint").textContent = "Draft saves as you type. Your numbers wait for you here.";
     $("in-date").value = todayISO();
-    clearTypeButtons();
+    renderPicker();
     renderHistory();
     switchView("hist");
   }
 
-  function clearTypeButtons(){
-    Array.prototype.forEach.call(document.querySelectorAll(".types button"), function(b){
-      b.classList.remove("active");
-      b.setAttribute("aria-pressed","false");
-      delete b.dataset.armed;
+  // ----- Block picker (Cycle 02): stack blocks to build today's session -----
+  function conflictWith(bid){
+    var c = (PROGRAM.blocks[bid] && PROGRAM.blocks[bid].conflicts) || [];
+    for (var i=0;i<c.length;i++){
+      if (selBlocks.indexOf(c[i]) !== -1) return c[i];
+    }
+    return null;
+  }
+  // ----- Week ledger bar: the strength mandate at a glance -----
+  function renderWeekBar(){
+    var el = $("week-bar");
+    if (!el) return;
+    if (currentType || editing || !LOG.length){
+      el.style.display = "none";
+      el.innerHTML = "";
+      return;
+    }
+    var t = weekTally(isoOf(startOfWeek(new Date())));
+    var daysLeft = 7 - ((new Date().getDay() + 6) % 7); // Monday-anchored, incl. today
+    var pips = "";
+    for (var i=0;i<WK_LIFT_GOOD;i++){
+      pips += '<span class="wb-pip'+(i >= WK_LIFT_MIN ? " bonus" : "")+(t.liftDays > i ? " on" : "")+'"></span>';
+    }
+    var cpips = "";
+    for (var j=0;j<WK_CORE_MIN;j++){
+      cpips += '<span class="wb-pip core'+(t.coreDays > j ? " on" : "")+'"></span>';
+    }
+    var hint;
+    if (t.liftDays === 0){
+      hint = daysLeft <= 3
+        ? "No lifts banked &mdash; " + daysLeft + (daysLeft === 1 ? " day" : " days") + " left. The mission is muscle: lift first."
+        : "No lifts banked yet &mdash; Blocks 1, 2, 3 and 6 count.";
+    } else if (t.liftDays === 1){
+      hint = "One more lift banks the week.";
+    } else if (t.liftDays === 2){
+      hint = "Strength week banked &#10003; &mdash; a third is even better.";
+    } else {
+      hint = t.liftDays + " lifts banked. Best kind of week.";
+    }
+    if (t.coreDays < WK_CORE_MIN){
+      hint += " Core &times;" + (WK_CORE_MIN - t.coreDays) + " still owed &mdash; Block 7 stacks on any day, ~13 min.";
+    }
+    el.style.display = "";
+    el.innerHTML =
+      '<div class="wb-row"><span class="wb-lbl">Lift</span>' + pips +
+      '<span class="wb-lbl wb-core-lbl">Core</span>' + cpips +
+      '<span class="wb-left">' + daysLeft + (daysLeft === 1 ? " day" : " days") + ' left</span></div>' +
+      '<div class="wb-hint">' + hint + '</div>';
+  }
+
+  function renderPicker(){
+    renderWeekBar(); // renderPicker fires at every state transition — one choke point
+    var host = $("block-picker");
+    var label = $("picker-label");
+    if (!host) return;
+    if (currentType){ // a form is on stage; the picker steps aside
+      host.style.display = "none";
+      if (label) label.style.display = "none";
+      return;
+    }
+    host.style.display = "";
+    if (label) label.style.display = "flex";
+
+    // suggested stack + deload whisper — only while nothing is picked yet
+    var suggs = [], dl = false;
+    if (!selBlocks.length){
+      suggs = suggestStacks($("in-date").value || todayISO());
+      dl = deloadDue();
+    }
+    var h = "";
+    if (suggs.length || dl){
+      h += '<div class="sugg">';
+      if (suggs.length) h += '<div class="sugg-eyebrow">Today &mdash; suggested stack</div>';
+      suggs.forEach(function(sg, i){
+        h += '<button type="button" class="sugg-row" data-sugg="'+i+'">' +
+          '<span class="sugg-main"><span class="sugg-ids">'+sg.ids.join(" + ")+'</span>' +
+          '<span class="sugg-names">'+esc(sg.ids.map(function(b){ return PROGRAM.blocks[b].name; }).join(" · "))+'</span></span>' +
+          '<span class="sugg-min">&asymp; '+sg.est+' min</span>' +
+          '<span class="sugg-why">'+esc(sg.why)+'</span></button>';
+      });
+      if (dl){
+        h += '<div class="sugg-deload"><span>Six-plus weeks without a break &mdash; make this a deload week: same blocks, working sets &minus;40% (3&rarr;2, 2&rarr;1), keep the loads.</span>' +
+          '<button type="button" class="pc-btn ghost" id="deload-ok">Got it</button></div>';
+      }
+      h += '</div>';
+    }
+
+    h += '<div class="blocks-grid">';
+    BLOCK_ORDER.forEach(function(bid){
+      var blk = PROGRAM.blocks[bid];
+      var on = selBlocks.indexOf(bid) !== -1;
+      var off = !on && !!conflictWith(bid);
+      var kindCls = blk.kind === "Strength" ? "k-s" : (blk.kind === "Cardio" ? "k-c" : (blk.kind === "Stability" ? "k-st" : ""));
+      h += '<button type="button" class="blk'+(on?" on":"")+(off?" off":"")+(blk.wide?" wide":"")+'" data-blk="'+bid+'" aria-pressed="'+(on?"true":"false")+'">' +
+        '<span class="b-no">Block '+bid+'</span>' +
+        '<span class="b-name">'+esc(blk.name)+'</span>' +
+        '<span class="b-meta"><span class="'+kindCls+'">'+esc(blk.kind)+'</span> &middot; ~'+esc(blk.min)+' min</span>' +
+        '</button>';
+    });
+    h += '</div>';
+
+    var est = estOf(selBlocks);
+    var totCls = selBlocks.length ? (est < 60 ? "lo" : (est > 90 ? "hi" : "")) : "lo";
+    var hasStrength = selBlocks.some(function(b){ return STRENGTH_BLOCKS[b]; });
+    // when the week's mandate is still short, the warning gets personal
+    var wkNow = weekTally(isoOf(startOfWeek(new Date())));
+    h += '<div class="stack-bar">' +
+      '<div class="stack-line"><span>Warm-up 5 &middot; ' +
+      (selBlocks.length ? selBlocks.length + ' block' + (selBlocks.length > 1 ? 's' : '') : 'no blocks yet') +
+      ' &middot; Cool-down 5</span>' +
+      '<span class="stack-total '+totCls+'">&asymp; '+est+' min' + (selBlocks.length ? ' &middot; target 60&ndash;90' : '') + '</span></div>' +
+      (selBlocks.length && !hasStrength
+        ? '<div class="stack-hint warn">No strength block yet — ' +
+          (wkNow.liftDays < WK_LIFT_MIN
+            ? 'you\'re at ' + wkNow.liftDays + ' of ' + WK_LIFT_MIN + ' lifts this week. '
+            : 'always lift if you can. ') +
+          'Short day? Cut cardio, never strength.</div>'
+        : '<div class="stack-hint">One strength + one cardio fills a normal day; Block 7 stacks anywhere. Short day? Cut cardio, never strength.</div>') +
+      '</div>';
+
+    h += '<div class="stack-actions">' +
+      '<button type="button" class="day-btn" id="start-day"'+(selBlocks.length ? '' : ' disabled')+'>Start Session</button>' +
+      '<button type="button" class="day-btn ghost" id="free-day">Free</button></div>';
+
+    host.innerHTML = h;
+
+    Array.prototype.forEach.call(host.querySelectorAll(".sugg-row"), function(row){
+      row.addEventListener("click", function(){
+        var pick = suggs[+row.dataset.sugg];
+        if (!pick) return;
+        selBlocks = pick.ids.slice(); // pre-select only — every block stays toggleable
+        renderPicker();
+      });
+    });
+    var dok = $("deload-ok");
+    if (dok) dok.addEventListener("click", function(){
+      deloadSet();
+      renderPicker();
+      toast("Deload noted — lighter week, same movements");
+    });
+
+    Array.prototype.forEach.call(host.querySelectorAll(".blk"), function(b){
+      b.addEventListener("click", function(){
+        var bid = b.dataset.blk;
+        var at = selBlocks.indexOf(bid);
+        if (at !== -1){
+          selBlocks.splice(at, 1);
+        } else {
+          var cf = conflictWith(bid);
+          if (cf){
+            toast("Block " + bid + " doesn't stack with Block " + cf + " — they overlap");
+            return;
+          }
+          selBlocks.push(bid);
+          selBlocks.sort();
+        }
+        renderPicker();
+      });
+    });
+
+    var sd = $("start-day");
+    if (sd) sd.addEventListener("click", function(){
+      if (!selBlocks.length){ toast("Pick at least one block"); return; }
+      // both warnings share ONE arm, evaluated together — two competing arm
+      // states on one flag would ping-pong forever and deadlock the button
+      var hasS = selBlocks.some(function(b){ return STRENGTH_BLOCKS[b]; });
+      var warns = [];
+      if (loadDraft()) warns.push("you have an unfinished draft");
+      if (!hasS){
+        var tlN = weekTally(isoOf(startOfWeek(new Date()))).liftDays;
+        warns.push(tlN < WK_LIFT_MIN
+          ? "no strength block picked (you're at " + tlN + " of " + WK_LIFT_MIN + " lifts this week)"
+          : "no strength block picked");
+      }
+      if (warns.length && !sd.dataset.armed){
+        sd.dataset.armed = "1";
+        var msg = warns.join(", and ");
+        toast(msg.charAt(0).toUpperCase() + msg.slice(1) + " — tap again to start anyway");
+        setTimeout(function(){ delete sd.dataset.armed; }, 3000);
+        return;
+      }
+      delete sd.dataset.armed;
+      buildForm("Day"); // the date field above is respected — backdating stays
+    });
+    var fd = $("free-day");
+    if (fd) fd.addEventListener("click", function(){
+      if (loadDraft() && !fd.dataset.armed){
+        fd.dataset.armed = "1";
+        toast("You have an unfinished draft — tap again to start fresh anyway");
+        setTimeout(function(){ delete fd.dataset.armed; }, 3000);
+        return;
+      }
+      delete fd.dataset.armed;
+      buildForm("Free");
     });
   }
 
   // ----- Draft autosave (protects against tab eviction / stray taps) -----
   var draftTimer = null;
+  var draftOwned = false; // has the CURRENT form written the draft slot?
   function saveDraftSoon(){
     if (!currentType || editing) return;
     clearTimeout(draftTimer);
@@ -1315,8 +1999,10 @@
       try {
         var s = gather();
         if (!s.date) s.date = todayISO(); // a dateless draft would be unrestorable
-        if (hasContent(s)) localStorage.setItem(DRAFT_KEY, JSON.stringify(s));
-        else localStorage.removeItem(DRAFT_KEY);
+        if (hasContent(s)){ localStorage.setItem(DRAFT_KEY, JSON.stringify(s)); draftOwned = true; }
+        // only remove a draft this form owns — a contentless stray click on a
+        // fresh form must not delete an older stored draft
+        else if (draftOwned) localStorage.removeItem(DRAFT_KEY);
       } catch(e){}
     }, 400);
   }
@@ -1331,6 +2017,7 @@
   function clearDraft(){
     clearTimeout(draftTimer);
     draftTimer = null;
+    draftOwned = false;
     try { localStorage.removeItem(DRAFT_KEY); } catch(e){}
   }
 
@@ -1350,6 +2037,24 @@
     return (now - first) >= 14*DAY;
   }
 
+  // deload whisper: every ~6 weeks, one lighter week (same blocks, fewer sets).
+  // Same pattern as the PKEY nudge; deliberately NOT exported/imported — worst
+  // case on a new device the whisper reappears once and gets dismissed once.
+  var DKEY = "cole-training-deload";
+  function deloadLast(){ try { return localStorage.getItem(DKEY) || null; } catch(e){ return null; } }
+  function deloadSet(){ try { localStorage.setItem(DKEY, new Date().toISOString()); } catch(e){} }
+  function deloadDue(){
+    if (!LOG.length) return false;
+    var DAY = 86400000, now = Date.now();
+    var last = deloadLast();
+    if (last) return (now - new Date(last).getTime()) >= 42*DAY;
+    var first = LOG.reduce(function(a,s){
+      var t = parseISO(s.date).getTime();
+      return t < a ? t : a;
+    }, Infinity);
+    return (now - first) >= 42*DAY;
+  }
+
   function renderPrompt(){
     var el = $("prog-prompt");
     if (!el) return;
@@ -1358,44 +2063,47 @@
     var d = loadDraft();
     if (d){
       el.innerHTML = '<div class="prompt-card"><div class="pc-h">Unfinished session</div>' +
-        '<div class="pc-b">A draft from ' + fmtDate(d.date) + ' (Session ' + esc(d.type) + ') was saved as you typed.</div>' +
+        '<div class="pc-b">A draft from ' + fmtDate(d.date) + ' (' + esc(blocksLabel(d)) + ') was saved as you typed.</div>' +
         '<div class="pc-row"><button class="pc-btn" id="draft-resume">Resume</button>' +
         '<button class="pc-btn ghost" id="draft-discard">Discard</button></div></div>';
       $("draft-resume").addEventListener("click", function(){
-        var type = PROGRAM[d.type] ? d.type : "Free";
-        clearTypeButtons();
-        var btn = document.querySelector('.types button[data-type="'+type+'"]');
-        if (btn) btn.classList.add("active");
-        buildForm(type, d, false);
+        if (d.type === "Day"){
+          selBlocks = (d.blocks || []).slice();
+          buildForm("Day", d, false);
+        } else {
+          buildForm(PROGRAM[d.type] ? d.type : "Free", d, false);
+        }
       });
       $("draft-discard").addEventListener("click", function(){
         clearDraft();
         renderPrompt();
+        renderPicker(); // the suggested stack takes over from the resume card
         toast("Draft discarded");
       });
       return;
     }
 
-    var lastA = lastSession("A");
+    // earned suggestions across every block's strength list (names deduped —
+    // shared movements like Leg Curl appear once, whichever block runs them)
     var suggs = [];
-    PROGRAM.A.strength.forEach(function(ex){
-      var s = suggestNext(ex, lastA);
-      if (s && s.to) suggs.push({ name: ex.name, s: s });
+    var seenSug = {};
+    BLOCK_ORDER.forEach(function(bid){
+      (PROGRAM.blocks[bid].strength || []).forEach(function(ex){
+        if (seenSug[ex.name]) return;
+        seenSug[ex.name] = true;
+        var pf = progressionFor(ex); // same brain as the form — reads through low-fuel days
+        if (pf.sg && pf.sg.to) suggs.push({ name: ex.name, s: pf.sg, bid: bid });
+      });
     });
     if (suggs.length){
       // the suggestions card fulfills the periodic-nudge role; stamp the check-in
       // so it can't resurface months overdue the moment suggestions briefly vanish
       if (progressionDue()) progSet();
       el.innerHTML = '<div class="prompt-card"><div class="pc-h">Progression ready</div>' +
-        '<div class="pc-b">Earned on your last A session — these will pre-fill when you start:</div>' +
+        '<div class="pc-b">Earned last time — these pre-fill whenever their block is in the day\'s stack:</div>' +
         '<div class="pc-list">' + suggs.map(function(x){
-          return '<div class="pc-line"><span>'+esc(x.name)+'</span><span>'+x.s.from+' &rarr; '+x.s.to+' lbs</span></div>';
-        }).join("") + '</div>' +
-        '<button class="pc-btn" id="prog-start">Start Session A</button></div>';
-      $("prog-start").addEventListener("click", function(){
-        var btn = document.querySelector('.types button[data-type="A"]');
-        if (btn) btn.click();
-      });
+          return '<div class="pc-line"><span>'+esc(x.name)+' <span style="color:var(--muted);">&middot; B'+x.bid+'</span></span><span>'+x.s.from+' &rarr; '+x.s.to+' lbs</span></div>';
+        }).join("") + '</div></div>';
       return;
     }
 
@@ -1413,6 +2121,7 @@
   // ----- History rendering -----
   function summarize(s){
     var bits = [];
+    if (s.type === "Day" && s.blocks && s.blocks.length) bits.push("B" + s.blocks.join("·"));
     if (s.strength.length){
       bits.push(s.strength.length + " lift" + (s.strength.length>1?"s":""));
     }
@@ -1421,6 +2130,7 @@
     else if (s.cardio.length) bits.push("cardio");
     if (s.core.length) bits.push(s.core.length + " core");
     var out = bits.join("  ·  ") || "session";
+    if (s.fuel) out += "  ·  low fuel";
     if (s._edited) out += "  ·  amended";
     return out;
   }
@@ -1433,8 +2143,10 @@
     var thisWeek = LOG.filter(function(s){
       return parseISO(s.date) >= sow;
     }).length;
+    var wtNow = weekTally(isoOf(sow));
     stats.innerHTML =
-      '<div class="stat"><div class="num">' + thisWeek + '<small> / ' + CYCLE.weeklyGoal + '</small></div><div class="lbl">This Week</div></div>' +
+      '<div class="stat"><div class="num">' + thisWeek + '<small> / ' + CYCLE.weeklyGoal + '</small></div><div class="lbl">This Week</div>' +
+      '<div class="sub">' + wtNow.liftDays + ' lift' + (wtNow.liftDays === 1 ? '' : 's') + ' &middot; ' + wtNow.coreDays + ' core</div></div>' +
       '<div class="stat"><div class="num">' + LOG.length + '</div><div class="lbl">Total Logged</div></div>';
 
     var list = $("hist-list");
@@ -1473,14 +2185,15 @@
       item.className = "h-item";
       item.dataset.t = s._t || "";
       if (openSet[item.dataset.t]) item.classList.add("open");
-      var badgeClass = s.type === "A" ? "b-A" : (s.type === "B" ? "b-B" : "");
+      var badgeClass = s.type === "Day" ? (isStrengthDay(s) ? "b-A" : "b-B")
+        : (s.type === "A" ? "b-A" : (s.type === "B" ? "b-B" : ""));
       var top = document.createElement("div");
       top.className = "h-top";
       top.setAttribute("role","button");
       top.tabIndex = 0;
       top.setAttribute("aria-expanded", item.classList.contains("open") ? "true" : "false");
       top.innerHTML =
-        '<div class="h-badge '+badgeClass+'">'+ esc(s.type) +'</div>' +
+        '<div class="h-badge '+badgeClass+'">'+ esc(badgeText(s)) +'</div>' +
         '<div class="h-meta"><div class="h-date">'+ fmtDate(s.date) +'</div>' +
         '<div class="h-sum">'+ summarize(s) +'</div></div>' +
         '<div class="h-chev">&#9660;</div>';
@@ -1494,6 +2207,12 @@
       body.className = "h-body";
       var html = "";
 
+      if (s.type === "Day" && s.blocks && s.blocks.length){
+        var bnames = s.blocks.map(function(b){
+          return b + " " + (PROGRAM.blocks[b] ? PROGRAM.blocks[b].name : "");
+        }).join(" · ");
+        html += '<div class="h-section-tag">Blocks — ' + esc(bnames) + '</div>';
+      }
       if (s.strength.length){
         html += '<div class="h-section-tag">Strength</div>';
         s.strength.forEach(function(ex){
@@ -1530,6 +2249,9 @@
       }
       if (s.knee){
         html += '<div class="h-knee">&#9888; Knee discomfort flagged</div>';
+      }
+      if (s.fuel){
+        html += '<div class="h-fuel">&#9680; Low-fuel day &mdash; capped effort</div>';
       }
       if (s.notes){
         html += '<div class="h-notes">&ldquo;'+ esc(s.notes) +'&rdquo;</div>';
@@ -1571,10 +2293,16 @@
           if (idx > -1) LOG.splice(idx, 1);
           var okDel = Store.save(LOG);
           renderHistory();
+          // the undo toast outlives a tab switch — keep the Log tab's week
+          // bar, suggestions, and prompt in step with the data either way
+          renderPrompt();
+          renderPicker();
           toastAction(okDel ? "Session deleted" : "Session deleted (storage unavailable)", function(){
             LOG.push(s);
             var okUndo = Store.save(LOG);
             renderHistory();
+            renderPrompt();
+            renderPicker();
             toast(okUndo ? "Session restored" : "Restored for this visit only");
           });
         } else {
@@ -1625,7 +2353,9 @@
         }
         if (!top) return;
         if (!map[ex.name]){ map[ex.name] = []; order.push(ex.name); }
-        map[ex.name].push({ date: s.date, top: top, vol: vol, unit: hasW ? "lbs" : "reps" });
+        // reps-only movements may really be seconds (Plank) or yards (Farmer Carry)
+        map[ex.name].push({ date: s.date, top: top, vol: vol,
+          unit: hasW ? "lbs" : (unitForName(ex.name) || "reps") });
       });
     });
     return { map: map, order: order };
@@ -1633,7 +2363,10 @@
 
   // one exercise's plottable series: pick the dominant unit and keep matching points
   function unitSeries(ptsAll){
-    var unit = ptsAll.some(function(p){ return p.unit === "lbs"; }) ? "lbs" : "reps";
+    var unit = "lbs";
+    if (!ptsAll.some(function(p){ return p.unit === "lbs"; })){
+      unit = ptsAll.length ? ptsAll[0].unit : "reps";
+    }
     return {
       unit: unit,
       pts: ptsAll.filter(function(p){ return p.unit === unit; }).map(function(p){
@@ -1701,7 +2434,7 @@
         : '<span class="p-delta">&mdash;</span>');
       var latest = unit === "lbs"
         ? lastP.v + ' &times; ' + (lastP.r != null ? lastP.r : "-")
-        : lastP.v + ' reps';
+        : lastP.v + ' ' + unit;
 
       var top = document.createElement("div");
       top.className = "h-top";
@@ -1767,11 +2500,14 @@
     var done = Date.now() >= startD.getTime() + 28 * 86400000;
 
     if (done){
+      var metW = 0;
+      counts.weeks.forEach(function(wk){ if (wk.strDays >= WK_LIFT_MIN) metW++; });
       el.innerHTML =
         '<div class="cycle-card complete">' +
-        '<div class="cyc-h">Foundation laid.</div>' +
+        '<div class="cyc-h">Four weeks banked.</div>' +
         '<div class="cyc-b">' + counts.total + ' session' + (counts.total === 1 ? "" : "s") +
-        ' over four weeks. Carry your numbers into the next cycle.</div>' +
+        ' over four weeks &middot; strength mandate (2+ lifts/wk) met in ' + metW +
+        ' of 4. Carry your numbers into the next cycle.</div>' +
         '<button class="pc-btn" id="cyc-next">Begin Cycle ' + String(CYCLE.num + 1).padStart(2,"0") + '</button></div>';
       $("cyc-next").addEventListener("click", function(){
         CYCLE.num += 1;
@@ -1807,9 +2543,14 @@
         cells += '<span class="'+cls+'">'+inner+'</span>';
       }
       var met = counts.weeks[w].total >= CYCLE.weeklyGoal;
+      // strength mandate: sage when met; red ONLY for a fully elapsed week that
+      // missed it — current and future weeks stay neutral (progress, not judgment)
+      var wkEnded = startD.getTime() + (w + 1) * 7 * 86400000 <= Date.now();
+      var mandCls = counts.weeks[w].strDays >= WK_LIFT_MIN ? " met" : (wkEnded ? " miss" : "");
       rows += '<div class="cyc-row"><span class="cyc-wk">WK '+(w+1)+'</span>' +
         '<span class="cyc-cells">'+cells+'</span>' +
-        '<span class="cyc-tally'+(met ? " met" : "")+'">'+(met ? "&#10003; " : "")+counts.weeks[w].total+'/'+CYCLE.weeklyGoal+'</span></div>';
+        '<span class="cyc-tally'+(met ? " met" : "")+'">'+(met ? "&#10003; " : "")+counts.weeks[w].total+'/'+CYCLE.weeklyGoal+
+        '<span class="cyc-mand'+mandCls+'">S'+counts.weeks[w].strDays+' &middot; C'+counts.weeks[w].coreDays+'</span></span></div>';
     }
 
     var target = CYCLE.weeklyGoal * 4;
@@ -1841,7 +2582,7 @@
     $("tab-log").classList.toggle("active", isLog);
     $("tab-hist").classList.toggle("active", !isLog);
     $("savebar").style.display = (isLog && currentType) ? "block" : "none";
-    if (isLog) renderPrompt();
+    if (isLog){ renderPrompt(); renderPicker(); }
     window.scrollTo(0,0);
   }
 
@@ -1975,9 +2716,10 @@
     inp.click();
   }
   function contentKey(s){
-    return s.date + "|" + s.type + "|" + JSON.stringify(s.strength) + "|" + JSON.stringify(s.cardio) +
+    return s.date + "|" + s.type + "|" + JSON.stringify(s.blocks || []) + "|" +
+      JSON.stringify(s.strength) + "|" + JSON.stringify(s.cardio) +
       "|" + JSON.stringify(s.core) + "|" + JSON.stringify(s.warmup) + "|" + JSON.stringify(s.cooldown) +
-      "|" + s.rpe + "|" + (s.knee ? 1 : 0) + "|" + s.notes;
+      "|" + s.rpe + "|" + (s.knee ? 1 : 0) + "|" + (s.fuel ? 1 : 0) + "|" + s.notes;
   }
   function importData(file){
     var reader = new FileReader();
@@ -2047,38 +2789,6 @@
     $("tab-log").addEventListener("click", function(){ switchView("log"); });
     $("tab-hist").addEventListener("click", function(){ switchView("hist"); });
 
-    Array.prototype.forEach.call(document.querySelectorAll(".types button"), function(b){
-      b.setAttribute("aria-pressed","false");
-      b.addEventListener("click", function(){
-        // re-tapping the active type is a no-op (except in edit mode, where it
-        // means "abandon this edit and start fresh" and must be confirmed)
-        if (!editing && b.dataset.type === currentType) return;
-        // anything worth keeping on screen (edit changes or typed entries)
-        // requires a confirming second tap before it's discarded
-        if ((editing || (currentType && formHasEntries())) && !b.dataset.armed){
-          b.dataset.armed = "1";
-          toast(editing ? "Tap again to discard this edit and start fresh"
-                        : "Tap again to switch — current entries will be discarded");
-          setTimeout(function(){ delete b.dataset.armed; }, 3000);
-          return;
-        }
-        delete b.dataset.armed;
-        var hadForm = !!currentType;
-        var wasEditing = !!editing;
-        editing = null;
-        stopRest();
-        // only clear a draft when the user confirmed replacing a live (non-edit)
-        // form; a cold tap must not destroy a stored draft behind the resume card
-        if (hadForm && !wasEditing) clearDraft();
-        clearTypeButtons();
-        b.classList.add("active");
-        b.setAttribute("aria-pressed","true");
-        $("in-date").value = todayISO();
-        buildForm(b.dataset.type);
-        b.scrollIntoView({behavior:"smooth", block:"nearest"});
-      });
-    });
-
     $("save-btn").addEventListener("click", saveSession);
 
     // draft autosave: one delegated pair of listeners survives form rebuilds
@@ -2086,6 +2796,10 @@
     fa.addEventListener("input", saveDraftSoon);
     fa.addEventListener("click", saveDraftSoon);
     $("in-date").addEventListener("change", saveDraftSoon);
+    // backdating recomputes the suggested stack for that date's week
+    $("in-date").addEventListener("change", function(){
+      if (!currentType && !editing) renderPicker();
+    });
 
     // tap an exercise name in a session to jump to its progress row
     $("hist-list").addEventListener("click", function(e){
@@ -2128,6 +2842,7 @@
         updateCycleTag();
         renderHistory();
         renderPrompt();
+        renderPicker(); // week bar + suggestions follow the fresh data
       }
     });
 
@@ -2145,6 +2860,7 @@
         LOG = [];
         Store.save(LOG);
         try { localStorage.removeItem(PKEY); } catch(e){}
+        try { localStorage.removeItem(DKEY); } catch(e){}
         clearDraft();
         CYCLE = { start: isoOf(startOfWeek(new Date())), num: 1, weeklyGoal: 4 };
         cycleSave();
